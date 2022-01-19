@@ -1,0 +1,1 @@
+export enum CProductState { ACTIVO='A', INACTIVO='I', AGOTADO='G' }

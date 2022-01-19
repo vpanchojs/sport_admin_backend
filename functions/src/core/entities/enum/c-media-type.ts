@@ -1,0 +1,1 @@
+export enum CMediaType { VIDEO='V', IMAGEN='I', GIF='G' }

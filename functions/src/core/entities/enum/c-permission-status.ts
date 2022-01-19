@@ -1,0 +1,1 @@
+enum CPermissionStatus { enable, disable }

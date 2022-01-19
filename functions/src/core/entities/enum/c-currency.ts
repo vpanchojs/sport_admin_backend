@@ -1,0 +1,1 @@
+enum CCurrency { dolar, euro }

@@ -1,0 +1,1 @@
+export enum CScheduleCategory { manana, tarde, noche, madrugada, especial }

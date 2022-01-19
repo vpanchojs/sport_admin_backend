@@ -1,0 +1,1 @@
+enum CEntities{ permission,user,userRol,company,sportSpace,all,schedule,price,address,reservation}

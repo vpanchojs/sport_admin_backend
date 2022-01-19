@@ -1,0 +1,1 @@
+export enum CCategory { TECNOLOGIA='T', FARMACIA='F', AUTOMOTRIZ='G', GASTRONOMICA='A', OTRAS='O' }

@@ -1,0 +1,1 @@
+enum CDay { monday, tuesday, wednesday, thursday, friday, saturday, sunday }

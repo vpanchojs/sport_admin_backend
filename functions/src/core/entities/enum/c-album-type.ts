@@ -1,0 +1,1 @@
+export enum CAlbumType { PERFIL='U', PRODUCTO='P', PROFORMA='Q' }

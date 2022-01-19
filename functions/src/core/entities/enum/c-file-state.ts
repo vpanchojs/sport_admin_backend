@@ -1,0 +1,1 @@
+export enum CFileState { ACTIVO='A', INACTIVO='I' }

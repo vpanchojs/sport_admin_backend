@@ -1,0 +1,1 @@
+export enum CPostState { ACTIVO='A', INACTIVO='I', EXPIRADO='E' }
