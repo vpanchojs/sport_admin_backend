@@ -14,6 +14,7 @@ export class ScheduleRepository {
                 'status': schedule.status,
                 "initHour": schedule.initHour,
                 "endHour": schedule.endHour,
+                'unitTimeUse':schedule.unitTimeUse,
                 "created": admin.firestore.FieldValue.serverTimestamp(),
                 "sportSpaceId": schedule.sportSpace?.sportSpaceId
             };
@@ -49,6 +50,7 @@ export class ScheduleRepository {
                     days:data.days,
                     initHour:data.initHour,
                     endHour:data.endHour,
+                    unitTimeUse:data.unitTimeUse,
                     status: data.status,
                     created: data.created,
                 });

@@ -36,6 +36,7 @@ export const createSchedule = functions.https.onCall(async (data, context) => {
     initHour: data.initHour,
     endHour: data.endHour,
     sportSpace: data.sportSpace,
+    unitTimeUse:data.unitTimeUse,
     prices: data.prices
   }
 
