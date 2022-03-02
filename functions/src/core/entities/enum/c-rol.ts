@@ -1,0 +1,1 @@
+export enum CRol { companyAdmin = 'company_admin', companyEmployee = 'company_employee', none = 'none' }

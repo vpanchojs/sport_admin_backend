@@ -4,6 +4,7 @@ const { getFirestore } = require('firebase-admin/firestore');
 import * as functions from "firebase-functions";
 import { ECompany } from "../../core/entities/e-company";
 import { CollectionsDB } from "../db/collections";
+import { ESearchSportSpace } from "../../core/entities/e-search-sportspace";
 
 export class SportSpaceRepository {
     async createSportSpace(sportSpace: ESportSpace): Promise<ESportSpace> {
@@ -19,22 +20,31 @@ export class SportSpaceRepository {
                 "sportType": sportSpace.sportType,
                 "companyId": sportSpace.company?.companyId
             };
-            let doc = getFirestore().collection('company').doc(sportSpace.company?.companyId).collection("sport-space").doc();
+            let doc = getFirestore().collection(CollectionsDB.company).doc(sportSpace.company?.companyId).collection(CollectionsDB.sportspace).doc();
             await doc.create(data)
             sportSpace.sportSpaceId = doc.id;
             return sportSpace;
         } catch (e) {
-            functions.logger.log("Error al SportSpaceRepository - createSportSpace :" + e);
-            return Promise.reject(e);
+            functions.logger.error("SportSpaceRepository - createSportSpace :" + e);
+            return Promise.reject('Problemas al crear el centro deportivo');
         }
     }
 
-    async getAllSportSpacesByCompany(company: ECompany): Promise<ESportSpace[]> {
+    async getAllSportSpacesByCompany(search: ESearchSportSpace): Promise<ESportSpace[]> {        
         try {
-            let snapshot = await getFirestore().collection(CollectionsDB.company).doc(company.companyId).collection("sport-space").get();
+            let snapshotRef = getFirestore()
+                .collection(CollectionsDB.company).doc(search.company.companyId)
+                .collection(CollectionsDB.sportspace);
+
+            let snapshot 
+            if(search.status != null){
+                snapshot = await snapshotRef.where("status",'==', search.status).get();
+            }else{
+                snapshot = await snapshotRef.get();
+            }                                
             let sportSpaces: ESportSpace[] = [];
             if (snapshot.empty) {
-                console.log('No matching documents.');
+                console.log('No matching documents');
                 return sportSpaces;
             }
 
@@ -48,7 +58,7 @@ export class SportSpaceRepository {
                     maxPlayersTeam: data.maxPlayersTeam,
                     material: data.material,
                     status: data.status,
-                    created: data.created,
+                    created: data.created.toDate().getTime() - ((5 * 60)* 60000),
                     sportType: data.sportType,
                     company: <ECompany>{
                         companyId: data.companyId
@@ -58,8 +68,75 @@ export class SportSpaceRepository {
 
             return sportSpaces;
         } catch (e) {
-            functions.logger.log("Error al SportSpaceRepository - getAllSportSpacesByCompany :" + e);
-            return Promise.reject(e);
+            functions.logger.error("SportSpaceRepository - getAllSportSpacesByCompany :" + e);
+            return Promise.reject("No se pueden obtener los centros deportivos");
         }
     }
+
+    async getSportSpaceById(search: ESearchSportSpace): Promise<ESportSpace> {        
+        try {
+            let doc = getFirestore()
+                .collection(CollectionsDB.company).doc(search.company.companyId)
+                .collection(CollectionsDB.sportspace).doc(search.sportSpace.sportSpaceId).get();
+        
+            let sportSpace: ESportSpace; 
+            const data = doc.data();
+            if(data){
+                sportSpace =  <ESportSpace>{
+                    sportSpaceId: doc.id,
+                    name: data.name,
+                    description: data.description,
+                    maxTeams: data.maxTeams,
+                    maxPlayersTeam: data.maxPlayersTeam,
+                    material: data.material,
+                    status: data.status,
+                    created: data.created.toDate().getTime() - ((5 * 60)* 60000),
+                    sportType: data.sportType,
+                    company: <ECompany>{
+                        companyId: data.companyId
+                    }
+                }
+                return sportSpace;
+            }
+            return  Promise.reject("Es posible que el centro deportivo no exista");         
+        } catch (e) {
+            functions.logger.error("SportSpaceRepository - getSportSpaceById :" + e);
+            return Promise.reject("Problemas al obtener el centro deportivo");
+        }
+    }
+
+    async enableSportSpace(sportSpace: ESportSpace): Promise<ESportSpace> {
+        try {
+            let data = {
+                'status': sportSpace.status,
+                'updated': admin.firestore.FieldValue.serverTimestamp()
+            };
+            let doc = getFirestore().collection(CollectionsDB.company).doc(sportSpace!.company?.companyId)
+                                    .collection(CollectionsDB.sportspace).doc(sportSpace?.sportSpaceId);
+            await doc.update(data)
+            sportSpace.updated = new Date().getTime()  - ((5 * 60)* 60000);            
+            return sportSpace;
+        } catch (e) {
+            functions.logger.error("SportSpaceRepository - enableSportSpace :" + e);
+            return Promise.reject('Problemas al activar el espacio deportivo');
+        }
+    }
+
+    async disableSportSpace(sportSpace: ESportSpace): Promise<ESportSpace> {
+        try {
+            let data = {
+                'status': sportSpace.status,
+                'updated': admin.firestore.FieldValue.serverTimestamp()
+            };
+            let doc = getFirestore().collection(CollectionsDB.company).doc(sportSpace!.company!.companyId)
+                                    .collection(CollectionsDB.sportspace).doc(sportSpace!.sportSpaceId);
+            await doc.update(data)
+            sportSpace.updated = new Date().getTime() - ((5 * 60)* 60000);            
+            return sportSpace;
+        } catch (e) {
+            functions.logger.error("SportSpaceRepository - disableSportSpace :" + e);
+            return Promise.reject('Problemas al desactivar el espacio deportivo');
+        }
+    }
+
 }

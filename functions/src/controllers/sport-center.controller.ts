@@ -2,13 +2,15 @@ import * as functions from "firebase-functions";
 import { SportSpaceService } from "../application/service/sport-space.service";
 import { ECompany } from "../core/entities/e-company";
 import { EResponse } from "../core/entities/e-reponse";
-import { ESchedule } from "../core/entities/e-schedule";
+import { ESearchSportSpace } from "../core/entities/e-search-sportspace";
 import { ESportSpace } from "../core/entities/e-sport-space";
 import { EUser } from "../core/entities/e-user";
 
 export const createSportSpace = functions.https.onCall(async (data, context) => {
+  functions.logger.info("controller - createSportSpace: "+data);
+  
   let sportSpace: ESportSpace;
-  console.log('data', data);
+  
   sportSpace = {
     name: data.name,
     description: data.description,
@@ -27,34 +29,50 @@ export const createSportSpace = functions.https.onCall(async (data, context) => 
 });
 
 
-export const createSchedule = functions.https.onCall(async (data, context) => {
-  let schedule: ESchedule;
-  console.log('data', data);
-  schedule = {
-    category: data.category,
-    days: data.days,
-    initHour: data.initHour,
-    endHour: data.endHour,
-    sportSpace: data.sportSpace,
-    prices: data.prices
-  }
+export const getAll = functions.https.onCall(async (data, context) => {
+  functions.logger.log("controller - getAll: " + data.status);
 
-  const response: EResponse<ESchedule> = await new SportSpaceService().createSchedule(schedule);
+  let search = <ESearchSportSpace> {
+    company:  <ECompany>{
+      companyId : data.companyId,
+      admin : <EUser>{
+        userId: context.auth?.uid
+      }    
+    },
+    status : data.status
+  }
+  const response: EResponse<ESportSpace[]> = await new SportSpaceService().getAllSportSpacesByCompany(search);
+  return response;
+});
+
+export const getById = functions.https.onCall(async (data, context) => {
+
+  let search = <ESearchSportSpace> {
+    company:  <ECompany>{
+      companyId : data.companyId,
+      admin : <EUser>{
+        userId: context.auth?.uid
+      }    
+    },
+    sportSpace:data.sportSpace,
+    status : data.status
+  }
+  const response: EResponse<ESportSpace> = await new SportSpaceService().getSportSpaceById(search);
+  return response;
+});
+
+export const enableSportSpace = functions.https.onCall(async (data, context) => {
+  functions.logger.info("controller - enableSportSpace: "+data);
+  
+  const response: EResponse<ESportSpace> = await new SportSpaceService().enableSportSpace(data);
   return response;
 
 });
 
-export const getAll = functions.https.onCall(async (data, context) => {
-  const uid = context.auth?.uid;
-  functions.logger.log("Data uid:" + uid);
-
-  let company = <ECompany>{
-    companyId : data.companyId,
-    admin : <EUser>{
-      userId: context.auth?.uid
-    }    
-  }
-
-  const response: EResponse<ESportSpace[]> = await new SportSpaceService().getAllSportSpacesByCompany(company);
+export const disableSportSpace = functions.https.onCall(async (data, context) => {
+  functions.logger.info("controller - disableSportSpace: "+data);
+  
+  const response: EResponse<ESportSpace> = await new SportSpaceService().disableSportSpace(data);
   return response;
+
 });

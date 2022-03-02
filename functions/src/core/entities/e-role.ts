@@ -3,7 +3,7 @@ import { CRoleStatus } from "./enum/c-role-status";
 
 export interface ERole{
   roleId?:String;
-  code?:String
+  code?:string
   description?:String;
   status?:CRoleStatus;
   created?:Date;

@@ -1,10 +1,7 @@
 import * as functions from "firebase-functions";
-import { CompanyService } from "../application/service/company.service";
 import { UserService } from "../application/service/user.service";
-import { ECompany } from "../core/entities/e-company";
 import { EResponse } from "../core/entities/e-reponse";
 import { EUser } from "../core/entities/e-user";
-import { EUserRol } from "../core/entities/e-user-rol";
 
 export const updateUser = functions.https.onCall(async (data, context) => {
   let user: EUser;
@@ -20,6 +17,7 @@ export const updateUser = functions.https.onCall(async (data, context) => {
 
 
 export const createUser = functions.https.onCall(async (data, context) => {
+  functions.logger.info("controller - createUser:" + JSON.stringify(data));
   let user: EUser;
   user = {
     userId: context.auth?.uid,
@@ -36,26 +34,9 @@ export const createUser = functions.https.onCall(async (data, context) => {
 
 
 export const getUser = functions.https.onCall(async (data, context) => {
-  const uid = context.auth?.uid;
-  functions.logger.log("Data uid:" + uid);
+  functions.logger.info("controller - getUser:" + JSON.stringify(data));
+  const uid = context.auth?.uid;  
   const response: EResponse<EUser> = await new UserService().getUserById(uid!);
   return response;
 });
 
-export const crearCompany = functions.https.onCall(async (data, context) => {
-  let company:ECompany;
-  const uid = context.auth?.uid;
-  company = {
-    name:data.name,
-    description:data.description,
-    admin:{
-      account:{
-        accountId:uid
-      }
-    }
-  }
-
-  const response: EResponse<EUserRol> = await new CompanyService().createCompany(company);
-  return response;
-
-});

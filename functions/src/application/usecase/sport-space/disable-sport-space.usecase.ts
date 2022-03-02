@@ -5,24 +5,24 @@ import * as functions from "firebase-functions";
 import { CSportSpaceStatus } from "../../../core/entities/enum/c-sport-space-status";
 import { SportSpaceRepository } from "../../../infraestructure/user/sport-space.repository";
 
-export class CreateSportSpaceUseCase implements UseCase<ESportSpace, EResponse<ESportSpace>>{
+export class DisableSportSpaceUseCase implements UseCase<ESportSpace, EResponse<ESportSpace>>{
 
     async execute(param: ESportSpace): Promise<EResponse<ESportSpace>> {
         let response: EResponse<ESportSpace>;
         try {
 
-            param.status = CSportSpaceStatus.enable         
+            param.status = CSportSpaceStatus.disable         
         
-            const sportSpaceCreated = await new SportSpaceRepository().createSportSpace(param)
+            const sportSpaceUpdated = await new SportSpaceRepository().disableSportSpace(param)
             response = {
-                data: sportSpaceCreated,
+                data: sportSpaceUpdated,
                 code: 200,
             }
         } catch (error) {
-            functions.logger.error("CreateSportSpaceUseCase: " + error);
+            functions.logger.error("DisableSportSpaceUseCase: " + error);
             response = {
                 code: 400,
-                message: "Problemas al crear el centro deportivo"
+                message: "Problemas al desactivar el centro deportivo"
             }
         }        
         return response;

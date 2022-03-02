@@ -1,3 +1,4 @@
+import * as functions from "firebase-functions";
 import { UseCase } from "../../../core/base/usecase";
 import { EResponse } from "../../../core/entities/e-reponse";
 import { EUserRol } from "../../../core/entities/e-user-rol";
@@ -22,6 +23,7 @@ export class GetUserRolUseCase implements UseCase<string, EResponse<EUserRol[]>>
                 }
             }            
         } catch (error) {
+            functions.logger.info("GetUserRolUseCase :" + error);
             response = {
                 code: 400,
                 message: "Problemas al obtener los roles del usuario"

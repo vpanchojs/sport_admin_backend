@@ -5,18 +5,18 @@ import * as functions from "firebase-functions";
 import { SportSpaceRepository } from "../../../infraestructure/user/sport-space.repository";
 import { ESearchSportSpace } from "../../../core/entities/e-search-sportspace";
 
-export class GetAllSportSpaceByCompanyUseCase implements UseCase<ESearchSportSpace, EResponse<ESportSpace[]>>{
+export class GetSportSpaceByIdUseCase implements UseCase<ESearchSportSpace, EResponse<ESportSpace>>{
 
-    async execute(param: ESearchSportSpace): Promise<EResponse<ESportSpace[]>> {
-        let response: EResponse<ESportSpace[]>;
+    async execute(param: ESearchSportSpace): Promise<EResponse<ESportSpace>> {
+        let response: EResponse<ESportSpace>;
         try {          
-            const sportSpaces = await new SportSpaceRepository().getAllSportSpacesByCompany(param)
+            const sportSpace = await new SportSpaceRepository().getSportSpaceById(param)
             response = {
-                data: sportSpaces,
+                data: sportSpace,
                 code: 200,
             }            
         } catch (error) {
-            functions.logger.log("GetAllSportSpaceByCompanyUseCase: " + error);
+            functions.logger.log("GetSportSpaceByIdUseCase: " + error);
             response = {
                 code: 400,
                 message: "Problemas al obtener los space sport"

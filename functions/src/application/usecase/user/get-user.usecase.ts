@@ -2,6 +2,7 @@ import { UseCase } from "../../../core/base/usecase";
 import { EResponse } from "../../../core/entities/e-reponse";
 import { EUser } from "../../../core/entities/e-user";
 import { UserRepository } from "../../../infraestructure/user/user.repository";
+import * as functions from "firebase-functions";
 
 export class GetUserByIdUseCase implements UseCase<string, EResponse<EUser>>{
 
@@ -22,9 +23,10 @@ export class GetUserByIdUseCase implements UseCase<string, EResponse<EUser>>{
             }
 
         } catch (error) {
+            functions.logger.error("GetUserByIdUseCase:" + error);
             response = {
                 code: 500,
-                message: "Problemas al procesar la solicitud"
+                message: error + ''
             }
         }
 

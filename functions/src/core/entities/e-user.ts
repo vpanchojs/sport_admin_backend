@@ -15,6 +15,7 @@ export interface EUser {
   userId?:string
   name?:string;
   lastName?:string;
+  dni?:String;
   verified?:boolean;
   photo?:EMedia;
   aboutMe?:string;
