@@ -1,6 +1,8 @@
 import { EResponse } from "../../core/entities/e-reponse";
 import { EReservation } from "../../core/entities/e-reservation";
+import { ESearchReservation } from "../../core/entities/e-search-reservations";
 import { CreateReservationUseCase } from "../usecase/reservation/create-reservation.usecase";
+import { GetReservationsByDateUseCase } from "../usecase/reservation/get-reservations-by-date.usecase";
 
 export class ReservationService {
 
@@ -32,6 +34,22 @@ export class ReservationService {
             }
        }else{
            return companyCanceled;
+       } 
+       return response;
+        
+    }
+
+    async getReservationsByDate(search: ESearchReservation): Promise<EResponse<ESearchReservation>> {
+        let response: EResponse<ESearchReservation>;      
+       const reponse = await new GetReservationsByDateUseCase().execute(search);
+
+       if(reponse.data == null){
+            response = {
+                code: 400,
+                message: reponse.message
+            }
+       }else{
+           return reponse;
        } 
        return response;
         
