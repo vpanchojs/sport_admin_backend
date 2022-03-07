@@ -1,8 +1,11 @@
 import { EResponse } from "../../core/entities/e-reponse";
 import { EReservation } from "../../core/entities/e-reservation";
 import { ESearchReservation } from "../../core/entities/e-search-reservations";
+import { CancelReservationUseCase } from "../usecase/reservation/cancel-reservation.usecase";
+import { CompleteReservationUseCase } from "../usecase/reservation/complete-reservation.usecase";
 import { CreateReservationUseCase } from "../usecase/reservation/create-reservation.usecase";
 import { GetReservationsByDateUseCase } from "../usecase/reservation/get-reservations-by-date.usecase";
+import { PlayingReservationUseCase } from "../usecase/reservation/playing-reservation.usecase";
 
 export class ReservationService {
 
@@ -25,15 +28,15 @@ export class ReservationService {
 
     async cancelReservation(reservation: EReservation): Promise<EResponse<EReservation>> {
         let response: EResponse<EReservation>;      
-       const companyCanceled = await new CreateReservationUseCase().execute(reservation);
+       const cancelledReservation = await new CancelReservationUseCase().execute(reservation);
 
-       if(companyCanceled.data == null){
+       if(cancelledReservation.data == null){
             response = {
                 code: 400,
-                message: companyCanceled.message
+                message: cancelledReservation.message
             }
        }else{
-           return companyCanceled;
+           return cancelledReservation;
        } 
        return response;
         
@@ -50,6 +53,38 @@ export class ReservationService {
             }
        }else{
            return reponse;
+       } 
+       return response;
+        
+    }
+
+    async playingReservation(reservation: EReservation): Promise<EResponse<EReservation>> {
+        let response: EResponse<EReservation>;      
+       const playingReservation = await new PlayingReservationUseCase().execute(reservation);
+
+       if(playingReservation.data == null){
+            response = {
+                code: 400,
+                message: playingReservation.message
+            }
+       }else{
+           return playingReservation;
+       } 
+       return response;
+        
+    }
+
+    async completeReservation(reservation: EReservation): Promise<EResponse<EReservation>> {
+        let response: EResponse<EReservation>;      
+       const completedReservation = await new CompleteReservationUseCase().execute(reservation);
+
+       if(completedReservation.data == null){
+            response = {
+                code: 400,
+                message: completedReservation.message
+            }
+       }else{
+           return completedReservation;
        } 
        return response;
         

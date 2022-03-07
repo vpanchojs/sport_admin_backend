@@ -5,22 +5,22 @@ import * as functions from "firebase-functions";
 import { CReservationStatus } from "../../../core/entities/enum/c-reservation-status";
 import { ReservationRepository } from "../../../infraestructure/reservation.repository";
 
-export class CancelReservationUseCase implements UseCase<EReservation, EResponse<EReservation>>{
+export class CompleteReservationUseCase implements UseCase<EReservation, EResponse<EReservation>>{
 
     async execute(param: EReservation): Promise<EResponse<EReservation>> {
         let response: EResponse<EReservation>;
         try {  
-            param.status = CReservationStatus.canceled
-            const reservationCanceled = await new ReservationRepository().cancelReservation(param)
+            param.status = CReservationStatus.completed
+            const reservationCanceled = await new ReservationRepository().completeReservation(param)
             response = {
                 data: reservationCanceled,
                 code: 200,
             }
         } catch (error) {
-            functions.logger.log("DeleteReservationUseCase: " + error);
+            functions.logger.log("CompleteReservationUseCase: " + error);
             response = {
                 code: 400,
-                message: "Problemas al cancelar la reserva"
+                message: "Problemas al completar la reserva"
             }
         }        
         return response;

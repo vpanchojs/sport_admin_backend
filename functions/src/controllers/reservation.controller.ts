@@ -15,7 +15,7 @@ export const createReservation = functions.https.onCall(async (data, context) =>
 export const cancelReservation = functions.https.onCall(async (data, context) => {
   console.log('data', data);
 
-  const response: EResponse<EReservation> = await new ReservationService().createReservation(data);
+  const response: EResponse<EReservation> = await new ReservationService().cancelReservation(data);
   return response;
 
 });
@@ -25,5 +25,21 @@ export const getByDay = functions.https.onCall(async (data, context) => {
 
   const response: EResponse<ESearchReservation> = await new ReservationService().getReservationsByDate(data);
   return response;
+});
+
+export const playingReservation = functions.https.onCall(async (data, context) => {
+  console.log('data', data);
+
+  const response: EResponse<EReservation> = await new ReservationService().playingReservation(data);
+  return response;
+
+});
+
+export const completeReservation = functions.https.onCall(async (data, context) => {
+  console.log('data', data);
+
+  const response: EResponse<EReservation> = await new ReservationService().completeReservation(data);
+  return response;
+
 });
 

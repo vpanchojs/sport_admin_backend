@@ -52,6 +52,7 @@ export class ReservationRepository {
                                     .collection(CollectionsDB.sportspace).doc(reservation.schedule?.sportSpace?.sportSpaceId)
                                     .collection(CollectionsDB.reservation).doc(reservation.reservationId);
             await doc.update(data)
+            reservation.updated = new Date();
             reservation.reservationId = doc.id;
             return reservation;
         } catch (e) {
@@ -88,6 +89,7 @@ export class ReservationRepository {
                     endTime: data.endTime,
                     observation: data.observation,
                     created: data.created,
+                    updated: data.updated,
                     price: <EPrice>{
                         priceId: data.priceId
                     },
@@ -106,6 +108,44 @@ export class ReservationRepository {
             return search;
         } catch (e) {
             functions.logger.log("Error al ReservationRepository - getReservationsByDate :" + e);
+            return Promise.reject(e);
+        }
+    }
+
+    async completeReservation(reservation: EReservation): Promise<EReservation> {
+        try {
+            let data = {
+                'status': reservation.status,
+                'updated': admin.firestore.FieldValue.serverTimestamp()
+            };
+            let doc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule?.sportSpace!.company?.companyId)
+                                    .collection(CollectionsDB.sportspace).doc(reservation.schedule?.sportSpace?.sportSpaceId)
+                                    .collection(CollectionsDB.reservation).doc(reservation.reservationId);
+            await doc.update(data)
+            reservation.reservationId = doc.id;
+            reservation.updated = new Date();
+            return reservation;
+        } catch (e) {
+            functions.logger.log("Error al ReservationRepository - completeReservation :" + e);
+            return Promise.reject(e);
+        }
+    }
+
+    async playingReservation(reservation: EReservation): Promise<EReservation> {
+        try {
+            let data = {
+                'status': reservation.status,
+                'updated': admin.firestore.FieldValue.serverTimestamp()
+            };
+            let doc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule?.sportSpace!.company?.companyId)
+                                    .collection(CollectionsDB.sportspace).doc(reservation.schedule?.sportSpace?.sportSpaceId)
+                                    .collection(CollectionsDB.reservation).doc(reservation.reservationId);
+            await doc.update(data)
+            reservation.reservationId = doc.id;
+            reservation.updated = new Date();
+            return reservation;
+        } catch (e) {
+            functions.logger.log("Error al ReservationRepository - playingReservation :" + e);
             return Promise.reject(e);
         }
     }
