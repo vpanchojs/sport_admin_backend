@@ -1,3 +1,4 @@
+import * as functions from "firebase-functions";
 import { UseCase } from "../../../core/base/usecase";
 import { EResponse } from "../../../core/entities/e-reponse";
 import { EUserRol } from "../../../core/entities/e-user-rol";
@@ -21,9 +22,10 @@ export class CreateRoleUserUseCase implements UseCase<EUserRol, EResponse<EUserR
                 code: 200,
             }
         } catch (error) {
+            functions.logger.info("CreateRoleUserUseCase :" + error);
             response = {
                 code: 400,
-                message: "Problemas al crear el usuario"
+                message: "Problemas al crear el rol para el usuario"
             }
         }
         return response;

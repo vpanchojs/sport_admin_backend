@@ -3,6 +3,7 @@ import { EResponse } from "../../../core/entities/e-reponse";
 import { EUser } from "../../../core/entities/e-user";
 import { CUserStatus } from "../../../core/entities/enum/c-user-state";
 import { UserRepository } from "../../../infraestructure/user/user.repository";
+import * as functions from "firebase-functions";
 
 
 export class CreateUserUseCase implements UseCase<EUser, EResponse<EUser>>{
@@ -25,10 +26,11 @@ export class CreateUserUseCase implements UseCase<EUser, EResponse<EUser>>{
                 data: userCreated,
                 code: 200,
             }
-        } catch (error) {
+        } catch (e) {
+            functions.logger.error("CreateUserUseCase :" + e);
             response = {
                 code: 400,
-                message: "Problemas al crear el usuario"
+                message: e + ''
             }
         }
         return response;

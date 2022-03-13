@@ -1,3 +1,4 @@
+import * as functions from "firebase-functions";
 import { UseCase } from "../../../core/base/usecase";
 import { ECompany } from "../../../core/entities/e-company";
 import { EResponse } from "../../../core/entities/e-reponse";
@@ -22,9 +23,10 @@ export class GetCompanyByIdUseCase implements UseCase<String, EResponse<ECompany
             }
 
         } catch (error) {
+            functions.logger.error("CreateCGetCompanyByIdUseCaseompanyUseCase: " + error);
             response = {
                 code: 500,
-                message: "GetCompanyUseCase - Problemas al procesar la solicitud"
+                message: "Problemas al obtener la compañia"
             }
         }
 

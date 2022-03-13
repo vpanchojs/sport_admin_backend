@@ -7,8 +7,10 @@ import { ESportSpace } from "../core/entities/e-sport-space";
 import { EUser } from "../core/entities/e-user";
 
 export const createSportSpace = functions.https.onCall(async (data, context) => {
+  functions.logger.info("controller - createSportSpace: "+data);
+  
   let sportSpace: ESportSpace;
-  console.log('data', data);
+  
   sportSpace = {
     name: data.name,
     description: data.description,
@@ -28,6 +30,7 @@ export const createSportSpace = functions.https.onCall(async (data, context) => 
 
 
 export const createSchedule = functions.https.onCall(async (data, context) => {
+  functions.logger.info("controller - createSchedule: "+ data);
   let schedule: ESchedule;
   console.log('data', data);
   schedule = {
@@ -46,8 +49,7 @@ export const createSchedule = functions.https.onCall(async (data, context) => {
 });
 
 export const getAll = functions.https.onCall(async (data, context) => {
-  const uid = context.auth?.uid;
-  functions.logger.log("Data uid:" + uid);
+  functions.logger.info("controller - getAll: " + data);
 
   let company = <ECompany>{
     companyId : data.companyId,
@@ -58,4 +60,20 @@ export const getAll = functions.https.onCall(async (data, context) => {
 
   const response: EResponse<ESportSpace[]> = await new SportSpaceService().getAllSportSpacesByCompany(company);
   return response;
+});
+
+export const enableSportSpace = functions.https.onCall(async (data, context) => {
+  functions.logger.info("controller - enableSportSpace: "+data);
+  
+  const response: EResponse<ESportSpace> = await new SportSpaceService().enableSportSpace(data);
+  return response;
+
+});
+
+export const disableSportSpace = functions.https.onCall(async (data, context) => {
+  functions.logger.info("controller - disableSportSpace: "+data);
+  
+  const response: EResponse<ESportSpace> = await new SportSpaceService().disableSportSpace(data);
+  return response;
+
 });

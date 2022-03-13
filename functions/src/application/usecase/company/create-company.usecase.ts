@@ -25,10 +25,10 @@ export class CreateCompanyUseCase implements UseCase<ECompany, EResponse<ECompan
                 code: 200,
             }
         } catch (error) {
-            functions.logger.log("CreateCompanyUseCase: " + error);
+            functions.logger.error("CreateCompanyUseCase: " + error);
             response = {
                 code: 400,
-                message: "Problemas al crear la empresa"
+                message: "Problemas al crear la compañia"
             }
         }
         return response;

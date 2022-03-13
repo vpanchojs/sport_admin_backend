@@ -4,6 +4,7 @@ import * as functions from "firebase-functions";
 import { EUserRol } from '../../core/entities/e-user-rol';
 import { ECompany } from '../../core/entities/e-company';
 import { ERole } from '../../core/entities/e-role';
+import { CollectionsDB } from '../db/collections';
 const { getAuth } = require('firebase-admin/auth');
 const { getFirestore } = require('firebase-admin/firestore');
 const { initializeApp }= require('firebase-admin/app');
@@ -24,8 +25,8 @@ export class UserRepository {
 
             return accountCreated.uid;
         } catch (e) {
-            functions.logger.log("Error:" + e);
-            return Promise.reject(e);
+            functions.logger.error("UserRepository - createUser :" + e);
+            return Promise.reject("El correo electrónico ya esta en uso");
         }
     }
 
@@ -37,19 +38,17 @@ export class UserRepository {
                 "status": user.status,
                 "created": admin.firestore.FieldValue.serverTimestamp(),
             };
-            let doc = getFirestore().collection("user").doc(user.account!.accountId!);
+            let doc = getFirestore().collection(CollectionsDB.user).doc(user.account!.accountId!);
             await doc.create(data)
             return user;
         } catch (e) {
-            functions.logger.log("Error:" + e);
-            return Promise.reject(e);
+            functions.logger.error("UserRepository - savedUser :" + e);
+            return Promise.reject('No se pudo almacenar la información del usuario, porfavor comuniquese con soporte');
         }
     }
 
     async getUser(accountId: string): Promise<EUser|null> {
         try {
-            functions.logger.log("UserRepository - getUser: uid" + accountId);
-
             const account = await getAuth().getUser(accountId);            
             let doc = await getFirestore().collection("user").doc(accountId).get();
             //Obtener el email de la cuenta de usuario
@@ -70,7 +69,7 @@ export class UserRepository {
             }
             return null;
         } catch (e) {
-            functions.logger.log("UserRepository - getUser:" + e);
+            functions.logger.error("UserRepository - getUser:" + e);
             return Promise.reject("Problemas al obtener el usuario");
         }
     }
@@ -86,8 +85,8 @@ export class UserRepository {
             await doc.update(data);
             return user;
         } catch (e) {
-            functions.logger.log("Error:" + e);
-            return Promise.reject(e);
+            functions.logger.error("UserRepository updateUser:" + e);
+            return Promise.reject("Problemas al actualizar el usuario");
         }
     }
 
@@ -117,8 +116,8 @@ export class UserRepository {
             return userRoles;
 
         } catch (e) {
-            functions.logger.log("Error:" + e);
-            return null;
+            functions.logger.error("UserRepository getUserRol:" + e);
+            return Promise.reject('Problemas al obtener el rol del usuario');
         }
     }
 
@@ -135,8 +134,8 @@ export class UserRepository {
             userRol.userRolId = doc.id;
             return userRol;
         } catch (e) {
-            functions.logger.log("Error:" + e);
-            return Promise.reject(e);
+            functions.logger.error("UserRepository createUserRol:" + e);
+            return Promise.reject('Problemas al crear el rol al usuario');
         }
     }
 

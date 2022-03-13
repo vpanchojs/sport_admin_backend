@@ -10,15 +10,8 @@ export class UserService {
     async createUser(param: EUser): Promise<EResponse<EUser>> {
         let response: EResponse<EUser>;
 
-        const reponseGetUser = await new GetUserByIdUseCase().execute(param.account!.accountId!);
-        if (reponseGetUser.data != null) {
-            response = {
-                code: 400,
-                message: "El usuario ya existe"
-            }
-        } else {
-            response = await new CreateUserUseCase().execute(param)
-        }
+        response = await new CreateUserUseCase().execute(param)
+        
         return response;
     }
 
