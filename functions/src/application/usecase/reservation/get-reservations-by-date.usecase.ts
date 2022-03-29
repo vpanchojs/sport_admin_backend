@@ -8,14 +8,21 @@ export class GetReservationsByDateUseCase implements UseCase<ESearchReservation,
 
     async execute(param: ESearchReservation): Promise<EResponse<ESearchReservation>> {
         let response: EResponse<ESearchReservation>;
-        try {          
+        try {
+            const dateTemp = new Date(param.date! - ((5 * 60)* 60000));        
+            dateTemp.setHours(0);
+            dateTemp.setMinutes(0);
+            dateTemp.setSeconds(0);
+            dateTemp.setMilliseconds(0);
+            param.date = dateTemp.getTime();
+            
             const eSearchReservation = await new ReservationRepository().getReservationsByDate(param)
             response = {
                 data: eSearchReservation,
                 code: 200,
             }            
         } catch (error) {
-            functions.logger.log("GetReservationsByDateUseCase: " + error);
+            functions.logger.error("GetReservationsByDateUseCase: " + error);
             response = {
                 code: 400,
                 message: "Problemas al obtener las reservaciones"

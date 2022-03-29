@@ -1,4 +1,5 @@
-export enum CReservationStatus {
+export enum CReservationStatus {    
+    unutilized = 'unutilized',
     pending = 'pending',
     confirmated = 'confirmated',
     playing = 'playing',

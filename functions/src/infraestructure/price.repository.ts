@@ -25,11 +25,10 @@ export class PriceRepository {
            
                 await doc.create(data)
             eprice.priceId = doc.id;
-            console.log('Se creo el precio');
             return eprice;
         } catch (e) {
-            functions.logger.log("Error al PriceRepository - createPrice :" + e);
-            return Promise.reject(e);
+            functions.logger.log("PriceRepository - createPrice:" + e);
+            return Promise.reject('Problemas al crear el precio');
         }
     }
 
@@ -44,7 +43,6 @@ export class PriceRepository {
 
                 let prices: EPrice[] = [];
                 if (snapshot.empty) {
-                    console.log('No matching documents.');
                     return prices;
                 }
     
@@ -61,8 +59,8 @@ export class PriceRepository {
     
                 return prices;
         } catch (e) {
-            functions.logger.log("Error al PriceRepository - getAllPriceBySchedule :" + e);
-            return Promise.reject(e);
+            functions.logger.error("PriceRepository - getAllPriceBySchedule :" + e);
+            return Promise.reject('Problemas al obtener los precios');
         }
     }
 

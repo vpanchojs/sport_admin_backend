@@ -12,12 +12,11 @@ import { EUser } from "../core/entities/e-user";
 export class ReservationRepository {
     async createReservation(reservation: EReservation): Promise<EReservation> {
         try {
-            const ownerDate = new Date(reservation.initTime!);
             let data = {
                 'status': reservation.status,
                 "scheduleId": reservation.schedule?.scheduleId,
-                "initTime": reservation.initTime,
-                "endTime": reservation.endTime,
+                "initTime": new Date(reservation.initTime! + ((5 * 60)* 60000)),
+                "endTime": new Date(reservation.endTime! + ((5 * 60)* 60000)),
                 'observation': reservation.observation,
                 'created': admin.firestore.FieldValue.serverTimestamp(),
                 "priceId": reservation.price.priceId,
@@ -28,7 +27,7 @@ export class ReservationRepository {
                     "lastName": reservation.client?.lastName,
                     "dni": reservation.client?.dni
                 },
-                "ownerDate": ownerDate.getFullYear().toString() +ownerDate.getMonth().toString() + ownerDate.getDay().toString()
+                "ownerDate": reservation.ownerDate
             };
             let doc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule?.sportSpace!.company?.companyId)
                                     .collection(CollectionsDB.sportspace).doc(reservation.schedule?.sportSpace?.sportSpaceId)
@@ -37,7 +36,7 @@ export class ReservationRepository {
             reservation.reservationId = doc.id;
             return reservation;
         } catch (e) {
-            functions.logger.log("Error al ReservationRepository - createReservation :" + e);
+            functions.logger.error("Error al ReservationRepository - createReservation :" + e);
             return Promise.reject(e);
         }
     }
@@ -52,21 +51,21 @@ export class ReservationRepository {
                                     .collection(CollectionsDB.sportspace).doc(reservation.schedule?.sportSpace?.sportSpaceId)
                                     .collection(CollectionsDB.reservation).doc(reservation.reservationId);
             await doc.update(data)
-            reservation.updated = new Date();
+            reservation.updated = new Date().getTime();
             reservation.reservationId = doc.id;
             return reservation;
         } catch (e) {
-            functions.logger.log("Error al ReservationRepository - cancelReservation :" + e);
+            functions.logger.error("Error al ReservationRepository - cancelReservation :" + e);
             return Promise.reject(e);
         }
     }
 
     async getReservationsByDate(search: ESearchReservation): Promise<ESearchReservation> {
         try {
-            const ownerDate = new Date(search.date!);
+            functions.logger.info("ReservationRepository - getReservationsByDate :" + search.date!.toString());
             let snapshot =  await getFirestore().collection(CollectionsDB.company).doc(search.sportSpace!.company?.companyId)
             .collection(CollectionsDB.sportspace).doc(search.sportSpace?.sportSpaceId)
-            .collection(CollectionsDB.reservation).where("ownerDate", "==", ownerDate.getFullYear().toString() +ownerDate.getMonth().toString() + ownerDate.getDay().toString()).get()
+            .collection(CollectionsDB.reservation).where("ownerDate", "==", search.date!).get()
 
             let reservations: EReservation[] = [];
             if (snapshot.empty) {
@@ -85,11 +84,11 @@ export class ReservationRepository {
                             sportSpaceId: data.sportSpaceId
                         }                        
                     },
-                    initTime: data.initTime,
-                    endTime: data.endTime,
+                    initTime: data.initTime.toDate().getTime() - ((5 * 60)* 60000),
+                    endTime: data.endTime.toDate().getTime()- ((5 * 60)* 60000),
                     observation: data.observation,
-                    created: data.created,
-                    updated: data.updated,
+                    created: data.created.toDate().getTime() - ((5 * 60)* 60000),
+                    updated: (data.update != null ) ?  data.updated?.toDate()?.getTime() - ((5 * 60)* 60000) : data.created.toDate().getTime() - ((5 * 60)* 60000),
                     price: <EPrice>{
                         priceId: data.priceId
                     },
@@ -107,7 +106,7 @@ export class ReservationRepository {
             search.reservations = reservations;
             return search;
         } catch (e) {
-            functions.logger.log("Error al ReservationRepository - getReservationsByDate :" + e);
+            functions.logger.error("Error al ReservationRepository - getReservationsByDate :" + e);
             return Promise.reject(e);
         }
     }
@@ -123,10 +122,10 @@ export class ReservationRepository {
                                     .collection(CollectionsDB.reservation).doc(reservation.reservationId);
             await doc.update(data)
             reservation.reservationId = doc.id;
-            reservation.updated = new Date();
+            reservation.updated = new Date().getTime();
             return reservation;
         } catch (e) {
-            functions.logger.log("Error al ReservationRepository - completeReservation :" + e);
+            functions.logger.error("Error al ReservationRepository - completeReservation :" + e);
             return Promise.reject(e);
         }
     }
@@ -142,10 +141,22 @@ export class ReservationRepository {
                                     .collection(CollectionsDB.reservation).doc(reservation.reservationId);
             await doc.update(data)
             reservation.reservationId = doc.id;
-            reservation.updated = new Date();
+            reservation.updated = new Date().getTime();
             return reservation;
         } catch (e) {
-            functions.logger.log("Error al ReservationRepository - playingReservation :" + e);
+            functions.logger.error("Error al ReservationRepository - playingReservation :" + e);
+            return Promise.reject(e);
+        }
+    }
+    async deleteReservation(reservation: EReservation): Promise<EReservation> {
+        try {          
+            let doc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule?.sportSpace!.company?.companyId)
+                                    .collection(CollectionsDB.sportspace).doc(reservation.schedule?.sportSpace?.sportSpaceId)
+                                    .collection(CollectionsDB.reservation).doc(reservation.reservationId);
+            await doc.delete()
+            return reservation;
+        } catch (e) {
+            functions.logger.error("Error al ReservationRepository - deleteReservation :" + e);
             return Promise.reject(e);
         }
     }

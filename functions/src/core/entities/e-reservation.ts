@@ -13,10 +13,11 @@ import { EPayment } from './e-payment';
 export interface EReservation {
   reservationId?: String;
   schedule?: ESchedule;
-  initTime?: Date;
-  endTime?: Date;
-  created?: Date;
-  updated?: Date;
+  ownerDate?: number;
+  initTime?: number;
+  endTime?: number;
+  created?: number;
+  updated?: number;
   status?: CReservationStatus;
   client?: EUser;
   observation?: String;

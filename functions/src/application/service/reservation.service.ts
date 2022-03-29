@@ -6,87 +6,137 @@ import { CompleteReservationUseCase } from "../usecase/reservation/complete-rese
 import { CreateReservationUseCase } from "../usecase/reservation/create-reservation.usecase";
 import { GetReservationsByDateUseCase } from "../usecase/reservation/get-reservations-by-date.usecase";
 import { PlayingReservationUseCase } from "../usecase/reservation/playing-reservation.usecase";
+import { GenerateCalendarReservationUseCase } from "../usecase/schedule/generate-calendar-reservations.usecase";
+import { GetAllScheduleBySportSpaceUseCase } from "../usecase/sport-space/get-all-schedule-by-sport-space.usecase";
+import * as functions from "firebase-functions";
 
 export class ReservationService {
 
     async createReservation(reservation: EReservation): Promise<EResponse<EReservation>> {
         let response: EResponse<EReservation>;
         // Crear la compañia,         
-       const companyCreated = await new CreateReservationUseCase().execute(reservation);
+        const companyCreated = await new CreateReservationUseCase().execute(reservation);
 
-       if(companyCreated.data == null){
+        if (companyCreated.data == null) {
             response = {
                 code: 400,
                 message: companyCreated.message
             }
-       }else{
-           return companyCreated;
-       } 
-       return response;
-        
+        } else {
+            return companyCreated;
+        }
+        return response;
+
     }
 
     async cancelReservation(reservation: EReservation): Promise<EResponse<EReservation>> {
-        let response: EResponse<EReservation>;      
-       const cancelledReservation = await new CancelReservationUseCase().execute(reservation);
+        let response: EResponse<EReservation>;
 
-       if(cancelledReservation.data == null){
+        let dateNow = new Date().getTime();
+        let now = dateNow - ((5 * 60)*60000);
+        let reservationProcess;
+
+        if (now >= reservation.initTime! - ((5 * 60)*60000)) {
+            reservationProcess = await new CancelReservationUseCase().execute(reservation);
+        } else {
+            reservationProcess = await new CancelReservationUseCase().execute(reservation);
+        }
+
+        if (reservationProcess.data == null) {
             response = {
                 code: 400,
-                message: cancelledReservation.message
+                message: reservationProcess.message
             }
-       }else{
-           return cancelledReservation;
-       } 
-       return response;
-        
+        } else {
+            return reservationProcess;
+        }
+        return response;
+
     }
 
-    async getReservationsByDate(search: ESearchReservation): Promise<EResponse<ESearchReservation>> {
-        let response: EResponse<ESearchReservation>;      
-       const reponse = await new GetReservationsByDateUseCase().execute(search);
+    async getReservationsByDate(search: ESearchReservation): Promise<EResponse<ESearchReservation>> {        
+        const schedulesReponse = await new GetAllScheduleBySportSpaceUseCase().execute(search.sportSpace!);
 
-       if(reponse.data == null){
-            response = {
+        if (schedulesReponse.code != 200) {
+            return {
                 code: 400,
-                message: reponse.message
+                message: schedulesReponse.message
             }
-       }else{
-           return reponse;
-       } 
-       return response;
+        }
+
+        // Generar los items para reservar
+        search.schedules = schedulesReponse.data;
+        const reservationsGenerated  =  await new GenerateCalendarReservationUseCase().execute(search);
+
+        if(reservationsGenerated.code != 200){
+            return {
+                code: 400,
+                message: reservationsGenerated.message
+            }
+
+        }
+
+        const reservationsRegistered = await new GetReservationsByDateUseCase().execute(search);
+
+        if (reservationsRegistered.code != 200) {
+            return {
+                code: 400,
+                message: reservationsRegistered.message
+            }
+        }
+            
+        // Hacer cordinar los horarios utilizados.
+        for (let reservationCreated of reservationsRegistered.data?.reservations!) {
+            functions.logger.info("GetReservationsByDateUseCase: " + reservationCreated.initTime);
+            let reservation = reservationsGenerated.data!.find(item => reservationCreated.initTime == item.initTime && reservationCreated.endTime == item.endTime) as EReservation;    
+            if(reservation != null){
+                reservation.reservationId = reservationCreated.reservationId;
+                reservation.status = reservationCreated.status;
+                reservation.client = reservationCreated.client;
+                reservation.observation = reservationCreated.observation;
+                reservation.updated = reservationCreated.updated;
+            }
+            
+        }
+        search.reservations = reservationsGenerated.data!;
         
+        return {
+            code: 200,
+            data: search
+        }
+
     }
 
     async playingReservation(reservation: EReservation): Promise<EResponse<EReservation>> {
-        let response: EResponse<EReservation>;      
-       const playingReservation = await new PlayingReservationUseCase().execute(reservation);
+        let response: EResponse<EReservation>;
+        const playingReservation = await new PlayingReservationUseCase().execute(reservation);
 
-       if(playingReservation.data == null){
+        if (playingReservation.data == null) {
             response = {
                 code: 400,
                 message: playingReservation.message
             }
-       }else{
-           return playingReservation;
-       } 
-       return response;
-        
+        } else {
+            return playingReservation;
+        }
+        return response;
+
     }
 
     async completeReservation(reservation: EReservation): Promise<EResponse<EReservation>> {
-        let response: EResponse<EReservation>;      
-       const completedReservation = await new CompleteReservationUseCase().execute(reservation);
+        let response: EResponse<EReservation>;
+        const completedReservation = await new CompleteReservationUseCase().execute(reservation);
 
-       if(completedReservation.data == null){
+        if (completedReservation.data == null) {
             response = {
                 code: 400,
                 message: completedReservation.message
             }
-       }else{
-           return completedReservation;
-       } 
-       return response;
-        
+        } else {
+            return completedReservation;
+        }
+        return response;
+
     }
+
 }

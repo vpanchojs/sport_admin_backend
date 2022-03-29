@@ -2,7 +2,6 @@ import * as functions from "firebase-functions";
 import { SportSpaceService } from "../application/service/sport-space.service";
 import { ECompany } from "../core/entities/e-company";
 import { EResponse } from "../core/entities/e-reponse";
-import { ESchedule } from "../core/entities/e-schedule";
 import { ESportSpace } from "../core/entities/e-sport-space";
 import { EUser } from "../core/entities/e-user";
 
@@ -28,25 +27,6 @@ export const createSportSpace = functions.https.onCall(async (data, context) => 
 
 });
 
-
-export const createSchedule = functions.https.onCall(async (data, context) => {
-  functions.logger.info("controller - createSchedule: "+ data);
-  let schedule: ESchedule;
-  console.log('data', data);
-  schedule = {
-    category: data.category,
-    days: data.days,
-    initHour: data.initHour,
-    endHour: data.endHour,
-    sportSpace: data.sportSpace,
-    unitTimeUse:data.unitTimeUse,
-    prices: data.prices
-  }
-
-  const response: EResponse<ESchedule> = await new SportSpaceService().createSchedule(schedule);
-  return response;
-
-});
 
 export const getAll = functions.https.onCall(async (data, context) => {
   functions.logger.info("controller - getAll: " + data);

@@ -11,14 +11,7 @@ export class CreateScheduleUseCase implements UseCase<ESchedule, EResponse<ESche
     async execute(param: ESchedule): Promise<EResponse<ESchedule>> {
         let response: EResponse<ESchedule>;
         try {  
-            /*          
-            if (param.name == null && param.admin?.account?.accountId == null) {
-                return response = {
-                    code: 400,
-                    message: "Faltan algunos campos requeridos"
-                }
-            }
-            */
+
             param.status = CScheduleStatus.enable         
         
             const scheduleCreated = await new ScheduleRepository().createSchedule(param)
@@ -28,22 +21,20 @@ export class CreateScheduleUseCase implements UseCase<ESchedule, EResponse<ESche
             }
 
             for (const price of param.prices!) {
-                console.log('price a crear', price);
                 if(price != null){
                     price.schedule =  <ESchedule>{
                         scheduleId: scheduleCreated.scheduleId,
                         sportSpace: scheduleCreated.sportSpace
                     }                    
-                    const priceCreated =  await new CreatePriceUseCase().execute(price); 
-                    console.log('se creo priceCreated', priceCreated);                                      
+                    await new CreatePriceUseCase().execute(price);                         
                 }
 
             }
         } catch (error) {
-            functions.logger.log("CreateSportSpaceUseCase: " + error);
+            functions.logger.log("CreateScheduleUseCase: " + error);
             response = {
                 code: 400,
-                message: "Problemas al crear el space sport"
+                message: "Problemas al crear el horario"
             }
         }        
         return response;

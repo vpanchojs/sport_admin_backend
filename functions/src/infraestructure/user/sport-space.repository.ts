@@ -4,6 +4,7 @@ const { getFirestore } = require('firebase-admin/firestore');
 import * as functions from "firebase-functions";
 import { ECompany } from "../../core/entities/e-company";
 import { CollectionsDB } from "../db/collections";
+import { CSportSpaceStatus } from "../../core/entities/enum/c-sport-space-status";
 
 export class SportSpaceRepository {
     async createSportSpace(sportSpace: ESportSpace): Promise<ESportSpace> {
@@ -19,7 +20,7 @@ export class SportSpaceRepository {
                 "sportType": sportSpace.sportType,
                 "companyId": sportSpace.company?.companyId
             };
-            let doc = getFirestore().collection('company').doc(sportSpace.company?.companyId).collection("sport-space").doc();
+            let doc = getFirestore().collection(CollectionsDB.company).doc(sportSpace.company?.companyId).collection(CollectionsDB.sportspace).doc();
             await doc.create(data)
             sportSpace.sportSpaceId = doc.id;
             return sportSpace;
@@ -31,7 +32,11 @@ export class SportSpaceRepository {
 
     async getAllSportSpacesByCompany(company: ECompany): Promise<ESportSpace[]> {
         try {
-            let snapshot = await getFirestore().collection(CollectionsDB.company).doc(company.companyId).collection("sport-space").get();
+            let snapshot = await getFirestore()
+                .collection(CollectionsDB.company).doc(company.companyId)
+                .collection(CollectionsDB.sportspace)
+                .where("status",'==', CSportSpaceStatus.enable)
+                .get();
             let sportSpaces: ESportSpace[] = [];
             if (snapshot.empty) {
                 console.log('No matching documents.');

@@ -1,0 +1,74 @@
+import { EResponse } from "../../core/entities/e-reponse";
+import { ESchedule } from "../../core/entities/e-schedule";
+import { RemoveScheduleUseCase } from "../usecase/schedule/remove-schedule.usecase";
+import { CreateScheduleUseCase } from "../usecase/sport-space/create-schedule.usecase";
+import { GetAllScheduleBySportSpaceUseCase } from "../usecase/sport-space/get-all-schedule-by-sport-space.usecase";
+
+export class ScheduleService {
+    async createSchedule(schedule: ESchedule): Promise<EResponse<ESchedule>> {
+        let response: EResponse<ESchedule>;
+        //Obtener la lista de horarios creados.
+        //Verificar si se puede generar horarios correctamente
+
+        const totalMinutes = schedule.endHour! - schedule.initHour!;
+        if (totalMinutes % schedule.unitTimeUse! != 0) {
+            response = {
+                code: 412,
+                message: 'La unidad de tiempo no es divisible para el rango horario'
+            }
+            return response;  
+        }
+
+        const schedulesResponse =  await new GetAllScheduleBySportSpaceUseCase().execute(schedule.sportSpace!);
+        let collisionSchedules = false;
+        if(schedulesResponse.code == 200){
+            for (let day of schedule.days!){
+                for(let scheduleOld of schedulesResponse.data!){
+                    for(let dayOld of scheduleOld.days!){
+                        if(dayOld == day){                        
+
+                            if (!(schedule.initHour! < scheduleOld.initHour! && schedule.endHour! <= scheduleOld.initHour!)){
+                                //error, el horario no cumple
+                                collisionSchedules = true;
+                                break;
+                            }                                                        
+                        }
+                    }
+                }
+            }
+        }
+        
+        if(collisionSchedules){            
+            response = {
+                code: 412,
+                message: 'Se encontraron colisiones con otros horarios, modifique y vuelva a intentarlo'
+            }
+            return response;
+        }
+        
+        response = await new CreateScheduleUseCase().execute(schedule);
+
+        if (response.data == null) {
+            response = {
+                code: 400,
+                message: response.message
+            }
+        }
+        return response;
+
+    }
+
+    async removeSchedule(schedule: ESchedule): Promise<EResponse<ESchedule>> {
+        let response: EResponse<ESchedule>;     
+        response = await new RemoveScheduleUseCase().execute(schedule);
+
+        if (response.data == null) {
+            response = {
+                code: 400,
+                message: response.message
+            }
+        }
+        return response;
+
+    }
+}

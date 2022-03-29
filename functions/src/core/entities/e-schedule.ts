@@ -10,9 +10,20 @@ export interface ESchedule {
     unitTimeUse?:number;
     category?:CScheduleCategory
     status?:CScheduleStatus;
-    days?:CDay[];
+    days?:any[];
     created?:Date;
     updated?:Date;
     prices?:EPrice[];
     sportSpace?:ESportSpace
   }
+
+
+export function getOnlyHour(number : number) : number {
+  return number % 60 ;
+}
+
+
+export function getOnlyMinute(number : number) : number{
+  const hours: number = getOnlyHour(number);
+  return number  - (hours * 60);
+}

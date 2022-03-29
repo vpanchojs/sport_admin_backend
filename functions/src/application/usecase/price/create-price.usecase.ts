@@ -18,10 +18,10 @@ export class CreatePriceUseCase implements UseCase<EPrice, EResponse<EPrice>>{
                 code: 200,
             }
         } catch (error) {
-            functions.logger.log("CreatePriceUseCase: " + error);
+            functions.logger.error("CreatePriceUseCase: " + error);
             response = {
                 code: 400,
-                message: "Problemas al crear el create price"
+                message: "Problemas al crear el precio"
             }
         }        
         return response;

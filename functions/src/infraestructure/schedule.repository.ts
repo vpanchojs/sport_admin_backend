@@ -4,6 +4,7 @@ const { getFirestore } = require('firebase-admin/firestore');
 import * as functions from "firebase-functions";
 import { CollectionsDB } from "./db/collections";
 import { ESportSpace } from "../core/entities/e-sport-space";
+import { CScheduleStatus } from "../core/entities/enum/c-schedule-status";
 
 export class ScheduleRepository {
     async createSchedule(schedule: ESchedule): Promise<ESchedule> {
@@ -23,8 +24,8 @@ export class ScheduleRepository {
             schedule.scheduleId = doc.id;
             return schedule;
         } catch (e) {
-            functions.logger.log("Error al ScheduleRepository - createSchedule :" + e);
-            return Promise.reject(e);
+            functions.logger.error("ScheduleRepository - createSchedule :" + e);
+            return Promise.reject('Problema al crear el horario');
         }
     }
 
@@ -34,6 +35,7 @@ export class ScheduleRepository {
             .collection(CollectionsDB.company).doc(sportSpace.company!.companyId)
             .collection(CollectionsDB.sportspace).doc(sportSpace.sportSpaceId)
             .collection(CollectionsDB.schedule)
+            .where("status",'==', CScheduleStatus.enable)
             .get();
 
             let schedules: ESchedule[] = [];
@@ -58,8 +60,27 @@ export class ScheduleRepository {
 
             return schedules;
         } catch (e) {
-            functions.logger.log("Error al ScheduleRepository - getAllSchedulesBySportSpace :" + e);
-            return Promise.reject(e);
+            functions.logger.error("ScheduleRepository - getAllSchedulesBySportSpace :" + e);
+            return Promise.reject('Problemas al obtener los horarios');
+        }
+    }
+
+    async removeSchedule(schedule: ESchedule): Promise<ESchedule> {
+        try {
+            let data = {
+                'status': schedule.status,
+                'updated': admin.firestore.FieldValue.serverTimestamp()
+            };
+            let doc = getFirestore().collection(CollectionsDB.company).doc(schedule.sportSpace!.company!.companyId)
+            .collection(CollectionsDB.sportspace).doc(schedule.sportSpace!.sportSpaceId)
+            .collection(CollectionsDB.schedule).doc(schedule.scheduleId!);
+            
+            await doc.update(data)
+            schedule.updated = new Date();            
+            return schedule;
+        } catch (e) {
+            functions.logger.error("ScheduleRepository - removeSchedule :" + e);
+            return Promise.reject('Problemas al remover el horario');
         }
     }
 
