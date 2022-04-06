@@ -28,7 +28,7 @@ export class GenerateCalendarReservationUseCase implements UseCase<ESearchReserv
                         const initTime = Date.UTC(paramDate.getFullYear(), paramDate.getMonth(), paramDate.getDate(), getOnlyHour(hour), getOnlyMinute(hour));
 
                         let reservation = <EReservation>{
-                            status: (initTime < now) ? CReservationStatus.unutilized : CReservationStatus.pending,                            
+                            status: (initTime < now) ? CReservationStatus.unutilized : CReservationStatus.available,                            
                             schedule: <ESchedule>{
                                 scheduleId: schedule.scheduleId,
                                 sportSpace: param.sportSpace

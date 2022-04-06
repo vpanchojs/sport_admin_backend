@@ -26,7 +26,7 @@ export class UserRepository {
             return accountCreated.uid;
         } catch (e) {
             functions.logger.error("UserRepository - createUser :" + e);
-            return Promise.reject("El correo electrónico ya esta en uso");
+            return Promise.reject("Verifique sus datos e intentelo nuevamente");
         }
     }
 

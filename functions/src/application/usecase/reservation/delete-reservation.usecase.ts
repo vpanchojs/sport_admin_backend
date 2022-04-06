@@ -10,7 +10,7 @@ export class DeleteReservationUseCase implements UseCase<EReservation, EResponse
     async execute(param: EReservation): Promise<EResponse<EReservation>> {
         let response: EResponse<EReservation>;
         try {
-            param.status = CReservationStatus.pending
+            param.status = CReservationStatus.available
             const reservationDeleted = await new ReservationRepository().deleteReservation(param)
             response = {
                 data: reservationDeleted,

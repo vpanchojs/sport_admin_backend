@@ -1,5 +1,5 @@
-import { ECompany } from "../../core/entities/e-company";
 import { EResponse } from "../../core/entities/e-reponse";
+import { ESearchSportSpace } from "../../core/entities/e-search-sportspace";
 import { ESportSpace } from "../../core/entities/e-sport-space";
 import { CreateSportSpaceUseCase } from "../usecase/sport-space/create-sport-space.usecase";
 import { DisableSportSpaceUseCase } from "../usecase/sport-space/disable-sport-space.usecase";
@@ -22,9 +22,9 @@ export class SportSpaceService {
 
     }
 
-    async getAllSportSpacesByCompany(company: ECompany): Promise<EResponse<ESportSpace[]>> {
+    async getAllSportSpacesByCompany(search: ESearchSportSpace): Promise<EResponse<ESportSpace[]>> {
         let response: EResponse<ESportSpace[]>;
-        response = await new GetAllSportSpaceByCompanyUseCase().execute(company);    
+        response = await new GetAllSportSpaceByCompanyUseCase().execute(search);    
         
         if(response.code == 200){
             for (const sportspace of response.data!) {

@@ -4,7 +4,7 @@ import { EResponse } from "../core/entities/e-reponse";
 import { ESchedule } from "../core/entities/e-schedule";
 
 export const createSchedule = functions.https.onCall(async (data, context) => {
-  functions.logger.info("controller - createSchedule: "+ data);
+  functions.logger.info("controller - createSchedule: "+ data.toString());
   let schedule: ESchedule;
   schedule = {
     category: data.category,

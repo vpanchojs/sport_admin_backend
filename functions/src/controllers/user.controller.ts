@@ -24,7 +24,7 @@ export const createUser = functions.https.onCall(async (data, context) => {
     lastName: data.lastName,
     name: data.name,
     account: {
-      email: data.account.email,
+      email: data.account.email.trim(),
       password: data.account.password
     }
   }

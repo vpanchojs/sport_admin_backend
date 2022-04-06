@@ -3,6 +3,7 @@ import { ESchedule } from "../../core/entities/e-schedule";
 import { RemoveScheduleUseCase } from "../usecase/schedule/remove-schedule.usecase";
 import { CreateScheduleUseCase } from "../usecase/sport-space/create-schedule.usecase";
 import { GetAllScheduleBySportSpaceUseCase } from "../usecase/sport-space/get-all-schedule-by-sport-space.usecase";
+import * as functions from "firebase-functions";
 
 export class ScheduleService {
     async createSchedule(schedule: ESchedule): Promise<EResponse<ESchedule>> {
@@ -26,9 +27,11 @@ export class ScheduleService {
                 for(let scheduleOld of schedulesResponse.data!){
                     for(let dayOld of scheduleOld.days!){
                         if(dayOld == day){                        
-
-                            if (!(schedule.initHour! < scheduleOld.initHour! && schedule.endHour! <= scheduleOld.initHour!)){
+                            if ((schedule.initHour! < scheduleOld.initHour! && schedule.endHour! <= scheduleOld.initHour!)){
                                 //error, el horario no cumple
+                                functions.logger.error("ScheduleService - createSchedule: initHour " +  schedule.initHour);
+                                functions.logger.error("ScheduleService - createSchedule: olDinitHour " +  scheduleOld.initHour);
+                                functions.logger.error("ScheduleService - createSchedule: endHour " +  schedule.endHour);
                                 collisionSchedules = true;
                                 break;
                             }                                                        

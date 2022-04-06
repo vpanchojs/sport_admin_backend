@@ -10,8 +10,8 @@ export class CreateReservationUseCase implements UseCase<EReservation, EResponse
     async execute(param: EReservation): Promise<EResponse<EReservation>> {
         let response: EResponse<EReservation>;
         try {  
-            param.status = CReservationStatus.confirmated            
-            const dateTemp = new Date(param.initTime! - ((5 * 60)* 60000));        
+            param.status = CReservationStatus.reservated            
+            const dateTemp = new Date(param.initTime! + ((5 * 60)* 60000));        
             dateTemp.setHours(0);
             dateTemp.setMinutes(0);
             dateTemp.setSeconds(0);

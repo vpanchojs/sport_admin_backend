@@ -18,7 +18,8 @@ export class CreateUserUseCase implements UseCase<EUser, EResponse<EUser>>{
                 }
             }
 
-            param.status = CUserStatus.ACTIVO 
+            param.status = CUserStatus.ACTIVO
+            param.account?.email?.trim(); 
             const accountId: string = await new UserRepository().createUser(param);
             param.account!.accountId = accountId;
             const userCreated = await new UserRepository().savedUser(param)

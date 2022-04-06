@@ -1,1 +1,1 @@
-export enum CSportSpaceStatus { enable='E', disable='D', block='B' }
+export enum CSportSpaceStatus { enable = 'E', disable = 'D', block = 'B' }

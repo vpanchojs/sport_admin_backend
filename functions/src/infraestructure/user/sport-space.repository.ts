@@ -4,7 +4,7 @@ const { getFirestore } = require('firebase-admin/firestore');
 import * as functions from "firebase-functions";
 import { ECompany } from "../../core/entities/e-company";
 import { CollectionsDB } from "../db/collections";
-import { CSportSpaceStatus } from "../../core/entities/enum/c-sport-space-status";
+import { ESearchSportSpace } from "../../core/entities/e-search-sportspace";
 
 export class SportSpaceRepository {
     async createSportSpace(sportSpace: ESportSpace): Promise<ESportSpace> {
@@ -30,16 +30,21 @@ export class SportSpaceRepository {
         }
     }
 
-    async getAllSportSpacesByCompany(company: ECompany): Promise<ESportSpace[]> {
+    async getAllSportSpacesByCompany(search: ESearchSportSpace): Promise<ESportSpace[]> {        
         try {
-            let snapshot = await getFirestore()
-                .collection(CollectionsDB.company).doc(company.companyId)
-                .collection(CollectionsDB.sportspace)
-                .where("status",'==', CSportSpaceStatus.enable)
-                .get();
+            let snapshotRef = getFirestore()
+                .collection(CollectionsDB.company).doc(search.company.companyId)
+                .collection(CollectionsDB.sportspace);
+
+            let snapshot 
+            if(search.status != null){
+                snapshot = await snapshotRef.where("status",'==', search.status).get();
+            }else{
+                snapshot = await snapshotRef.get();
+            }                                
             let sportSpaces: ESportSpace[] = [];
             if (snapshot.empty) {
-                console.log('No matching documents.');
+                console.log('No matching documents');
                 return sportSpaces;
             }
 
@@ -53,7 +58,7 @@ export class SportSpaceRepository {
                     maxPlayersTeam: data.maxPlayersTeam,
                     material: data.material,
                     status: data.status,
-                    created: data.created,
+                    created: data.created.toDate().getTime() - ((5 * 60)* 60000),
                     sportType: data.sportType,
                     company: <ECompany>{
                         companyId: data.companyId
@@ -77,7 +82,7 @@ export class SportSpaceRepository {
             let doc = getFirestore().collection(CollectionsDB.company).doc(sportSpace!.company?.companyId)
                                     .collection(CollectionsDB.sportspace).doc(sportSpace?.sportSpaceId);
             await doc.update(data)
-            sportSpace.updated = new Date();            
+            sportSpace.updated = new Date().getTime()  - ((5 * 60)* 60000);            
             return sportSpace;
         } catch (e) {
             functions.logger.error("SportSpaceRepository - enableSportSpace :" + e);
@@ -94,7 +99,7 @@ export class SportSpaceRepository {
             let doc = getFirestore().collection(CollectionsDB.company).doc(sportSpace!.company!.companyId)
                                     .collection(CollectionsDB.sportspace).doc(sportSpace!.sportSpaceId);
             await doc.update(data)
-            sportSpace.updated = new Date();            
+            sportSpace.updated = new Date().getTime() - ((5 * 60)* 60000);            
             return sportSpace;
         } catch (e) {
             functions.logger.error("SportSpaceRepository - disableSportSpace :" + e);

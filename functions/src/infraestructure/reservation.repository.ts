@@ -45,6 +45,7 @@ export class ReservationRepository {
         try {
             let data = {
                 'status': reservation.status,
+                'observation':reservation.observation,
                 'updated': admin.firestore.FieldValue.serverTimestamp()
             };
             let doc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule?.sportSpace!.company?.companyId)
@@ -115,6 +116,7 @@ export class ReservationRepository {
         try {
             let data = {
                 'status': reservation.status,
+                'observation':reservation.observation,
                 'updated': admin.firestore.FieldValue.serverTimestamp()
             };
             let doc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule?.sportSpace!.company?.companyId)
@@ -134,6 +136,7 @@ export class ReservationRepository {
         try {
             let data = {
                 'status': reservation.status,
+                'observation':reservation.observation,
                 'updated': admin.firestore.FieldValue.serverTimestamp()
             };
             let doc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule?.sportSpace!.company?.companyId)

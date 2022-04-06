@@ -9,6 +9,7 @@ import { PlayingReservationUseCase } from "../usecase/reservation/playing-reserv
 import { GenerateCalendarReservationUseCase } from "../usecase/schedule/generate-calendar-reservations.usecase";
 import { GetAllScheduleBySportSpaceUseCase } from "../usecase/sport-space/get-all-schedule-by-sport-space.usecase";
 import * as functions from "firebase-functions";
+import { DeleteReservationUseCase } from "../usecase/reservation/delete-reservation.usecase";
 
 export class ReservationService {
 
@@ -36,10 +37,10 @@ export class ReservationService {
         let now = dateNow - ((5 * 60)*60000);
         let reservationProcess;
 
-        if (now >= reservation.initTime! - ((5 * 60)*60000)) {
+        if (now >= reservation.endTime! - ((5 * 60)*60000)) {
             reservationProcess = await new CancelReservationUseCase().execute(reservation);
         } else {
-            reservationProcess = await new CancelReservationUseCase().execute(reservation);
+            reservationProcess = await new  DeleteReservationUseCase().execute(reservation);
         }
 
         if (reservationProcess.data == null) {

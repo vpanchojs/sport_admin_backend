@@ -1,7 +1,7 @@
 export enum CReservationStatus {    
     unutilized = 'unutilized',
-    pending = 'pending',
-    confirmated = 'confirmated',
+    available = 'available',
+    reservated = 'reservated',
     playing = 'playing',
     completed = 'completed',
     canceled = 'canceled',

@@ -15,8 +15,8 @@ export interface ESportSpace {
     album?: EAlbum;
     material?:CSportSpaceMaterial;
     status?:CSportSpaceStatus;
-    created?:Date;
-    updated?:Date;
+    created?:number;
+    updated?:number;
     company?:ECompany;
     sportType?:CSportSpaceType;
     address?:EAddress; 

@@ -2,6 +2,7 @@ import * as functions from "firebase-functions";
 import { SportSpaceService } from "../application/service/sport-space.service";
 import { ECompany } from "../core/entities/e-company";
 import { EResponse } from "../core/entities/e-reponse";
+import { ESearchSportSpace } from "../core/entities/e-search-sportspace";
 import { ESportSpace } from "../core/entities/e-sport-space";
 import { EUser } from "../core/entities/e-user";
 
@@ -29,16 +30,18 @@ export const createSportSpace = functions.https.onCall(async (data, context) => 
 
 
 export const getAll = functions.https.onCall(async (data, context) => {
-  functions.logger.info("controller - getAll: " + data);
+  functions.logger.log("controller - getAll: " + data.status);
 
-  let company = <ECompany>{
-    companyId : data.companyId,
-    admin : <EUser>{
-      userId: context.auth?.uid
-    }    
+  let search = <ESearchSportSpace> {
+    company:  <ECompany>{
+      companyId : data.companyId,
+      admin : <EUser>{
+        userId: context.auth?.uid
+      }    
+    },
+    status : data.status
   }
-
-  const response: EResponse<ESportSpace[]> = await new SportSpaceService().getAllSportSpacesByCompany(company);
+  const response: EResponse<ESportSpace[]> = await new SportSpaceService().getAllSportSpacesByCompany(search);
   return response;
 });
 
