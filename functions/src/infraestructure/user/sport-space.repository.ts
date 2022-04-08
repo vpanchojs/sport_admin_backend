@@ -73,6 +73,38 @@ export class SportSpaceRepository {
         }
     }
 
+    async getSportSpaceById(search: ESearchSportSpace): Promise<ESportSpace> {        
+        try {
+            let doc = getFirestore()
+                .collection(CollectionsDB.company).doc(search.company.companyId)
+                .collection(CollectionsDB.sportspace).doc(search.sportSpace.sportSpaceId).get();
+        
+            let sportSpace: ESportSpace; 
+            const data = doc.data();
+            if(data){
+                sportSpace =  <ESportSpace>{
+                    sportSpaceId: doc.id,
+                    name: data.name,
+                    description: data.description,
+                    maxTeams: data.maxTeams,
+                    maxPlayersTeam: data.maxPlayersTeam,
+                    material: data.material,
+                    status: data.status,
+                    created: data.created.toDate().getTime() - ((5 * 60)* 60000),
+                    sportType: data.sportType,
+                    company: <ECompany>{
+                        companyId: data.companyId
+                    }
+                }
+                return sportSpace;
+            }
+            return  Promise.reject("Es posible que el centro deportivo no exista");         
+        } catch (e) {
+            functions.logger.error("SportSpaceRepository - getSportSpaceById :" + e);
+            return Promise.reject("Problemas al obtener el centro deportivo");
+        }
+    }
+
     async enableSportSpace(sportSpace: ESportSpace): Promise<ESportSpace> {
         try {
             let data = {

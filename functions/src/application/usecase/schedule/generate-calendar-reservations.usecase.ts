@@ -24,7 +24,7 @@ export class GenerateCalendarReservationUseCase implements UseCase<ESearchReserv
                 const day: CDay = cDayFromCode(paramDate.getDay());
                 if (schedule.days?.includes(CDay[day])) {
                     //Se generan los espacios de reserva de acuerdo a cada horario
-                    for (let hour = schedule.initHour!; hour <= schedule.endHour!; hour += schedule.unitTimeUse!) {
+                    for (let hour = schedule.initHour!; hour < schedule.endHour!; hour += schedule.unitTimeUse!) {
                         const initTime = Date.UTC(paramDate.getFullYear(), paramDate.getMonth(), paramDate.getDate(), getOnlyHour(hour), getOnlyMinute(hour));
 
                         let reservation = <EReservation>{

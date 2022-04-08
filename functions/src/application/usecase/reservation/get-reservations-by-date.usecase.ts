@@ -9,7 +9,8 @@ export class GetReservationsByDateUseCase implements UseCase<ESearchReservation,
     async execute(param: ESearchReservation): Promise<EResponse<ESearchReservation>> {
         let response: EResponse<ESearchReservation>;
         try {
-            const dateTemp = new Date(param.date!);        
+            const dateTemp = new Date(param.date! -((5 * 60)* 60000));
+            functions.logger.info("CreateReservationUseCase: ownerDate " + dateTemp.toString());        
             dateTemp.setHours(0);
             dateTemp.setMinutes(0);
             dateTemp.setSeconds(0);

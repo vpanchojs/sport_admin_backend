@@ -11,7 +11,8 @@ export class CreateReservationUseCase implements UseCase<EReservation, EResponse
         let response: EResponse<EReservation>;
         try {  
             param.status = CReservationStatus.reservated            
-            const dateTemp = new Date(param.initTime! + ((5 * 60)* 60000));        
+            const dateTemp = new Date(param.initTime!);
+            functions.logger.info("CreateReservationUseCase: ownerDate " + dateTemp.toString()); 
             dateTemp.setHours(0);
             dateTemp.setMinutes(0);
             dateTemp.setSeconds(0);

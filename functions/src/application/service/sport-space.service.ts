@@ -6,6 +6,7 @@ import { DisableSportSpaceUseCase } from "../usecase/sport-space/disable-sport-s
 import { EnableSportSpaceUseCase } from "../usecase/sport-space/enable-sport-space.usecase";
 import { GetAllScheduleBySportSpaceUseCase } from "../usecase/sport-space/get-all-schedule-by-sport-space.usecase";
 import { GetAllSportSpaceByCompanyUseCase } from "../usecase/sport-space/get-all-sport-space.usecase";
+import { GetSportSpaceByIdUseCase } from "../usecase/sport-space/get-sport-space-by-id.usecase";
 
 export class SportSpaceService {
     async createSportSpace(sportSpace: ESportSpace): Promise<EResponse<ESportSpace>> {
@@ -34,6 +35,20 @@ export class SportSpaceService {
                     sportspace.schedules = schedulesReponse.data!;
                 }
             }
+        }        
+        return response
+    }
+
+    async getSportSpaceById(search: ESearchSportSpace): Promise<EResponse<ESportSpace>> {
+        let response: EResponse<ESportSpace>;
+        response = await new GetSportSpaceByIdUseCase().execute(search);    
+        
+        if(response.code == 200){
+            const schedulesReponse =  await new GetAllScheduleBySportSpaceUseCase().execute(response.data!);
+
+            if(schedulesReponse.code == 200){
+                    response.data!.schedules = schedulesReponse.data!;
+            }            
         }        
         return response
     }

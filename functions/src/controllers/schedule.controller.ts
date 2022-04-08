@@ -28,3 +28,8 @@ export const removeSchedule = functions.https.onCall(async (data, context) => {
   return response;
 
 });
+
+export const getAllBySportSpace = functions.https.onCall(async (data, context) => {
+  const response: EResponse<ESchedule[]> = await new ScheduleService().getAllSchedulesBySportSpace(data);
+  return response;
+});

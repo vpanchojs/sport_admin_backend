@@ -45,6 +45,22 @@ export const getAll = functions.https.onCall(async (data, context) => {
   return response;
 });
 
+export const getById = functions.https.onCall(async (data, context) => {
+
+  let search = <ESearchSportSpace> {
+    company:  <ECompany>{
+      companyId : data.companyId,
+      admin : <EUser>{
+        userId: context.auth?.uid
+      }    
+    },
+    sportSpace:data.sportSpace,
+    status : data.status
+  }
+  const response: EResponse<ESportSpace> = await new SportSpaceService().getSportSpaceById(search);
+  return response;
+});
+
 export const enableSportSpace = functions.https.onCall(async (data, context) => {
   functions.logger.info("controller - enableSportSpace: "+data);
   
