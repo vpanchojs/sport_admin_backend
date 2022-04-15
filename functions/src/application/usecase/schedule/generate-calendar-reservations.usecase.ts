@@ -20,22 +20,23 @@ export class GenerateCalendarReservationUseCase implements UseCase<ESearchReserv
 
             
 
-            for (let schedule of param.schedules!) {
-                const day: CDay = cDayFromCode(paramDate.getDay());
+            for (let schedule of param.schedules!) {                
+                const day: CDay = cDayFromCode(paramDate.getDay());                
                 if (schedule.days?.includes(CDay[day])) {
                     //Se generan los espacios de reserva de acuerdo a cada horario
                     for (let hour = schedule.initHour!; hour < schedule.endHour!; hour += schedule.unitTimeUse!) {
                         const initTime = Date.UTC(paramDate.getFullYear(), paramDate.getMonth(), paramDate.getDate(), getOnlyHour(hour), getOnlyMinute(hour));
+                        const endTime = Date.UTC(paramDate.getFullYear(), paramDate.getMonth(), paramDate.getDate(), getOnlyHour(hour + schedule.unitTimeUse!), getOnlyMinute(hour + schedule.unitTimeUse!))
 
                         let reservation = <EReservation>{
-                            status: (initTime < now) ? CReservationStatus.unutilized : CReservationStatus.available,                            
+                            status: (endTime < now) ? CReservationStatus.unutilized : CReservationStatus.available,                            
                             schedule: <ESchedule>{
                                 scheduleId: schedule.scheduleId,
                                 sportSpace: param.sportSpace
                             },
                             price: schedule.prices![0],
                             initTime: initTime,
-                            endTime: Date.UTC(paramDate.getFullYear(), paramDate.getMonth(), paramDate.getDate(), getOnlyHour(hour + schedule.unitTimeUse!), getOnlyMinute(hour + schedule.unitTimeUse!))
+                            endTime: endTime
                         };
                         reservations.push(reservation);
                     }

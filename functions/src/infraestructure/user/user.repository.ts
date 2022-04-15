@@ -1,13 +1,15 @@
-import admin = require('firebase-admin');
+import * as admin from 'firebase-admin';
 import { EUser } from "../../core/entities/e-user";
 import * as functions from "firebase-functions";
 import { EUserRol } from '../../core/entities/e-user-rol';
 import { ECompany } from '../../core/entities/e-company';
 import { ERole } from '../../core/entities/e-role';
 import { CollectionsDB } from '../db/collections';
-const { getAuth } = require('firebase-admin/auth');
-const { getFirestore } = require('firebase-admin/firestore');
-const { initializeApp }= require('firebase-admin/app');
+import { getAuth,  } from 'firebase-admin/auth';
+import { getFirestore } from 'firebase-admin/firestore';
+import { initializeApp } from 'firebase-admin/app';
+//import { FirebaseError } from '@firebase/util';
+import { FirebaseError } from 'firebase-admin';
 
 
 initializeApp();
@@ -18,16 +20,24 @@ export class UserRepository {
 
         try {
             let accountCreated = await getAuth().createUser({
-                email: user.account?.email,
-                password: user.account?.password,
-                displayName: user.name + ',' + user.lastName
+                email: user.account!.email,
+                password: user.account!.password,
+                displayName: user.name + ', ' + user.lastName
             })
 
             return accountCreated.uid;
         } catch (e) {
-            functions.logger.error("UserRepository - createUser :" + e);
+            functions.logger.error("UserRepository - createUser :" + e );
+            if(isFirebaseError(e)){      
+                functions.logger.error("UserRepository - createUser :" + e.stack);
+                if(e.code == 'auth/email-already-exists'){
+                    return Promise.reject("El correo electronico ya esta en uso");        
+                }   
+            }
+
             return Promise.reject("Verifique sus datos e intentelo nuevamente");
         }
+
     }
 
     async savedUser(user: EUser): Promise<EUser> {
@@ -129,7 +139,7 @@ export class UserRepository {
                 "created": admin.firestore.FieldValue.serverTimestamp(),
             };
             
-            let doc = await getFirestore().collection("user").doc(userRol.user?.account?.accountId).collection('user-rol').doc();
+            let doc = await getFirestore().collection("user").doc(userRol.user!.account!.accountId!).collection('user-rol').doc();
             await doc.create(data)
             userRol.userRolId = doc.id;
             return userRol;
@@ -141,3 +151,7 @@ export class UserRepository {
 
 
 }
+
+export default function isFirebaseError(error: unknown): error is FirebaseError {
+    return (error as FirebaseError).code !== undefined;
+  }

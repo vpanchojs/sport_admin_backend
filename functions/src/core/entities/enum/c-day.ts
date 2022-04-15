@@ -15,7 +15,7 @@ export function cDayFromCode(code: number): CDay {
             return CDay.thursday;
         case 5:
             return CDay.friday;
-        case 5:
+        case 6:
             return CDay.saturday;
         default:
             return CDay.friday

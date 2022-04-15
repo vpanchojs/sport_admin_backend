@@ -36,6 +36,7 @@ export class ScheduleRepository {
             .collection(CollectionsDB.sportspace).doc(sportSpace.sportSpaceId)
             .collection(CollectionsDB.schedule)
             .where("status",'==', CScheduleStatus.enable)
+            .orderBy('initHour')
             .get();
 
             let schedules: ESchedule[] = [];

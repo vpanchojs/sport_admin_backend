@@ -37,7 +37,7 @@ export class ReservationService {
         let now = dateNow - ((5 * 60)*60000);
         let reservationProcess;
 
-        if (now >= reservation.endTime! - ((5 * 60)*60000)) {
+        if (now >= reservation.endTime!) {
             reservationProcess = await new CancelReservationUseCase().execute(reservation);
         } else {
             reservationProcess = await new  DeleteReservationUseCase().execute(reservation);

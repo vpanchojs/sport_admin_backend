@@ -22,7 +22,7 @@ export const cancelReservation = functions.https.onCall(async (data, context) =>
 });
 
 export const getByDay = functions.https.onCall(async (data, context) => {
-  functions.logger.info("controller - getByDay:" + data);
+  functions.logger.info("controller - getByDay:" + JSON.stringify(data));
 
   const response: EResponse<ESearchReservation> = await new ReservationService().getReservationsByDate(data);
   return response;

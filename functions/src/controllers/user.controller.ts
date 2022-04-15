@@ -17,14 +17,14 @@ export const updateUser = functions.https.onCall(async (data, context) => {
 
 
 export const createUser = functions.https.onCall(async (data, context) => {
-  functions.logger.info("controller - createUser:" + data);
+  functions.logger.info("controller - createUser:" + JSON.stringify(data));
   let user: EUser;
   user = {
     userId: context.auth?.uid,
     lastName: data.lastName,
     name: data.name,
     account: {
-      email: data.account.email.trim(),
+      email: data.account.email,
       password: data.account.password
     }
   }
@@ -34,7 +34,7 @@ export const createUser = functions.https.onCall(async (data, context) => {
 
 
 export const getUser = functions.https.onCall(async (data, context) => {
-  functions.logger.info("controller - getUser:" + data);
+  functions.logger.info("controller - getUser:" + JSON.stringify(data));
   const uid = context.auth?.uid;  
   const response: EResponse<EUser> = await new UserService().getUserById(uid!);
   return response;
