@@ -6,8 +6,8 @@ import { ESearchSportSpace } from "../core/entities/e-search-sportspace";
 import { ESportSpace } from "../core/entities/e-sport-space";
 import { EUser } from "../core/entities/e-user";
 
-export const createSportSpace = functions.https.onCall(async (data, context) => {
-  functions.logger.info("controller - createSportSpace: "+data);
+export const createSportSpace = functions.region('southamerica-east1').https.onCall(async (data, context) => {
+  functions.logger.info("controller - createSportSpace: "+ JSON.stringify(data));
   
   let sportSpace: ESportSpace;
   
@@ -29,8 +29,8 @@ export const createSportSpace = functions.https.onCall(async (data, context) => 
 });
 
 
-export const getAll = functions.https.onCall(async (data, context) => {
-  functions.logger.log("controller - getAll: " + data.status);
+export const getAll = functions.region('southamerica-east1').https.onCall(async (data, context) => {
+  functions.logger.log("controller - getAll: " + JSON.stringify(data));
 
   let search = <ESearchSportSpace> {
     company:  <ECompany>{
@@ -45,8 +45,8 @@ export const getAll = functions.https.onCall(async (data, context) => {
   return response;
 });
 
-export const getById = functions.https.onCall(async (data, context) => {
-
+export const getById = functions.region('southamerica-east1').https.onCall(async (data, context) => {
+  functions.logger.log("controller - getById: " + JSON.stringify(data));
   let search = <ESearchSportSpace> {
     company:  <ECompany>{
       companyId : data.companyId,
@@ -61,16 +61,16 @@ export const getById = functions.https.onCall(async (data, context) => {
   return response;
 });
 
-export const enableSportSpace = functions.https.onCall(async (data, context) => {
-  functions.logger.info("controller - enableSportSpace: "+data);
+export const enableSportSpace = functions.region('southamerica-east1').https.onCall(async (data, context) => {
+  functions.logger.info("controller - enableSportSpace: "+ JSON.stringify(data));
   
   const response: EResponse<ESportSpace> = await new SportSpaceService().enableSportSpace(data);
   return response;
 
 });
 
-export const disableSportSpace = functions.https.onCall(async (data, context) => {
-  functions.logger.info("controller - disableSportSpace: "+data);
+export const disableSportSpace = functions.region('southamerica-east1').https.onCall(async (data, context) => {
+  functions.logger.info("controller - disableSportSpace: "+ JSON.stringify(data));
   
   const response: EResponse<ESportSpace> = await new SportSpaceService().disableSportSpace(data);
   return response;

@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "sport-813ac"
-  }
+    "default": "sportstation-52abf",
+    "staging": "sportstation-52abf",
+    "prod": "sportstation-85415"
+  },
+  "targets": {}
 }

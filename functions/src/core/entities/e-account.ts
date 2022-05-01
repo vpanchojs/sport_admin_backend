@@ -5,4 +5,5 @@ export interface EAccount {
   email?: string
   password?: string
   sessions?: Array<EDevice>
+  verified?: boolean
 }

@@ -3,8 +3,8 @@ import { ScheduleService } from "../application/service/schedule.service";
 import { EResponse } from "../core/entities/e-reponse";
 import { ESchedule } from "../core/entities/e-schedule";
 
-export const createSchedule = functions.https.onCall(async (data, context) => {
-  functions.logger.info("controller - createSchedule: "+ data.toString());
+export const createSchedule = functions.region('southamerica-east1').https.onCall(async (data, context) => {
+  functions.logger.info("controller - createSchedule: "+ JSON.stringify(data));
   let schedule: ESchedule;
   schedule = {
     category: data.category,
@@ -21,15 +21,16 @@ export const createSchedule = functions.https.onCall(async (data, context) => {
 
 });
 
-export const removeSchedule = functions.https.onCall(async (data, context) => {
-  functions.logger.info("controller - removeSchedule: "+ data);
+export const removeSchedule = functions.region('southamerica-east1').https.onCall(async (data, context) => {
+  functions.logger.info("controller - removeSchedule: "+ JSON.stringify(data));
   
   const response: EResponse<ESchedule> = await new ScheduleService().removeSchedule(data);
   return response;
 
 });
 
-export const getAllBySportSpace = functions.https.onCall(async (data, context) => {
+export const getAllBySportSpace = functions.region('southamerica-east1').https.onCall(async (data, context) => {
+  functions.logger.info("controller - getAllBySportSpace: "+ JSON.stringify(data));
   const response: EResponse<ESchedule[]> = await new ScheduleService().getAllSchedulesBySportSpace(data);
   return response;
 });

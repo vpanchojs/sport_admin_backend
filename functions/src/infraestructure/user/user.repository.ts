@@ -69,7 +69,8 @@ export class UserRepository {
                     name: data.name,
                     account:{
                         accountId:doc.id,
-                        email:account.email!,                    
+                        email:account.email!,
+                        verified: account.emailVerified!                    
                     },                    
                     status: data.state,
                     lastName: data.lastName,
@@ -147,6 +148,22 @@ export class UserRepository {
             functions.logger.error("UserRepository createUserRol:" + e);
             return Promise.reject('Problemas al crear el rol al usuario');
         }
+    }
+
+
+    async verifyEmail(uid: string): Promise<boolean> {
+
+        try {
+            let accountCreated = await getAuth().updateUser(uid,{
+                emailVerified: true
+            })
+
+            return accountCreated.emailVerified;
+        } catch (e) {
+            functions.logger.error("UserRepository - verifyEmail :" + e );   
+            return Promise.reject("No se pudo validar el correo");
+        }
+
     }
 
 

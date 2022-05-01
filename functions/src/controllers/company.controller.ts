@@ -4,8 +4,8 @@ import { ECompany } from "../core/entities/e-company";
 import { EResponse } from "../core/entities/e-reponse";
 import { EUserRol } from "../core/entities/e-user-rol";
 
-export const crearCompany = functions.https.onCall(async (data, context) => {
-    functions.logger.info("controller - crearCompany:" + data);
+export const crearCompany = functions.region('southamerica-east1').https.onCall(async (data, context) => {
+    functions.logger.info("controller - crearCompany:" + JSON.stringify(data));
     let company: ECompany;
     const uid = context.auth?.uid;
     company = {
