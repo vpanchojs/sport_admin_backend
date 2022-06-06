@@ -14,11 +14,11 @@ import { CUserGender } from './enum/c-user-gender';
 export interface EUser {
   userId?:string
   name?:string;
-  lastName?:string;
-  dni?:String;
+  lastName?:String;
+  dni?:string;
   verified?:boolean;
   photo?:EMedia;
-  aboutMe?:string;
+  aboutMe?:String;
   created?:Date;
   updated?:Date;
   status?:CUserStatus;
@@ -27,4 +27,5 @@ export interface EUser {
   gender?:CUserGender;
   birthday?:Date;
   roles?:EUserRol[];
+  phone?:Array<string>;
 }
