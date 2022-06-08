@@ -10,6 +10,7 @@ import { getFirestore } from 'firebase-admin/firestore';
 import { initializeApp } from 'firebase-admin/app';
 //import { FirebaseError } from '@firebase/util';
 import { FirebaseError } from 'firebase-admin';
+import { EAccount } from '../../core/entities/e-account';
 
 
 initializeApp();
@@ -19,11 +20,14 @@ export class UserRepository {
     async createUser(user: EUser): Promise<string> {
 
         try {
-            let accountCreated = await getAuth().createUser({
+            let userCreate = {  
+                uid: user.account?.accountId,              
                 email: user.account!.email,
                 password: user.account!.password,
                 displayName: user.name + ', ' + user.lastName
-            })
+            }  
+            functions.logger.error("===========************ :" + JSON.stringify(userCreate));                    
+            let accountCreated = await getAuth().createUser(userCreate)
 
             return accountCreated.uid;
         } catch (e) {
@@ -47,9 +51,16 @@ export class UserRepository {
                 "lastName": user.lastName,
                 "status": user.status,
                 "created": admin.firestore.FieldValue.serverTimestamp(),
-            };
-            let doc = getFirestore().collection(CollectionsDB.user).doc(user.account!.accountId!);
+                "dni":user.dni
+            };            
+            let doc;
+            if(user.account?.accountId){
+                doc = getFirestore().collection(CollectionsDB.user).doc(user.account!.accountId!);
+            }else{                
+                doc = getFirestore().collection(CollectionsDB.user).doc();
+            }                                     
             await doc.create(data)
+            user.account!.accountId = doc.id;
             return user;
         } catch (e) {
             functions.logger.error("UserRepository - savedUser :" + e);
@@ -85,19 +96,49 @@ export class UserRepository {
         }
     }
 
+    async searchUserByDni(dni: string): Promise<EUser|null> {
+        try {                      
+            let doc = await getFirestore().collection("user").where('dni','==',dni).get();
+            //Obtener el email de la cuenta de usuario
+            let users: EUser[]=[];                       
+            if (doc.empty) {                
+                return null;
+            }
+            doc.forEach((user: any) => {
+                const data = user.data();
+                users.push(<EUser>{
+                    dni:data.dni,
+                    lastName:data.lastName,
+                    name:data.name,
+                    account:<EAccount>{
+                        accountId:user.id,
+                        email:data.email
+                    },
+                    status:data.status
+                });
+            });            
+            return users[0];
+        } catch (e) {
+            functions.logger.error("UserRepository - searchUserByDni:" + e);
+            return Promise.reject("Problemas al obtener el usuario");
+        }
+    }
+
     async updateUser(user: EUser): Promise<EUser> {
         try {
             let data = {
                 "name": user.name,
-                'birthday': admin.firestore.Timestamp.fromDate(user.birthday!),
-                "gender": user.gender,
+                "lastName": user.lastName,
+                "status": user.status,
+                //'birthday': admin.firestore.Timestamp.fromDate(user.birthday!),
+                //"gender": user.gender,
             };
-            let doc = getFirestore().collection("user").doc(user.userId!);
+            let doc = getFirestore().collection("user").doc(user.account?.accountId!);
             await doc.update(data);
             return user;
         } catch (e) {
             functions.logger.error("UserRepository updateUser:" + e);
-            return Promise.reject("Problemas al actualizar el usuario");
+            return Promise.reject("Problemas al guardar datos");
         }
     }
 

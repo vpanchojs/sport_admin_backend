@@ -10,15 +10,29 @@ import { GenerateCalendarReservationUseCase } from "../usecase/schedule/generate
 import { GetAllScheduleBySportSpaceUseCase } from "../usecase/sport-space/get-all-schedule-by-sport-space.usecase";
 import * as functions from "firebase-functions";
 import { DeleteReservationUseCase } from "../usecase/reservation/delete-reservation.usecase";
+import { CUserStatus } from "../../core/entities/enum/c-user-state";
+import { CreateUserUseCase } from "../usecase/user/create-user.usecase";
 
 export class ReservationService {
 
     async createReservation(reservation: EReservation): Promise<EResponse<EReservation>> {
-        let response: EResponse<EReservation>;
-        // Crear la compañia,         
+        let response: EResponse<EReservation>;                
+        if(!reservation.client?.account?.accountId){
+            reservation.client!.status = CUserStatus.REGISTRO_PENDIENTE;  
+            const clientCreated = await new CreateUserUseCase().execute(reservation.client!);
+            if (clientCreated.data == null) { 
+                response = {
+                    code: 400,
+                    message: clientCreated.message
+                } 
+                return response;
+            }
+            reservation.client!.userId= clientCreated.data.account?.accountId;
+        } 
+        // Crear la compañia,                       
         const companyCreated = await new CreateReservationUseCase().execute(reservation);
 
-        if (companyCreated.data == null) {
+        if (companyCreated.data == null) {          
             response = {
                 code: 400,
                 message: companyCreated.message
@@ -26,8 +40,8 @@ export class ReservationService {
         } else {
             return companyCreated;
         }
-        return response;
 
+        return response;
     }
 
     async cancelReservation(reservation: EReservation): Promise<EResponse<EReservation>> {
