@@ -1,35 +1,18 @@
-import * as functions from "firebase-functions";
 import { UseCase } from "../../../core/base/usecase";
-import { EResponse } from "../../../core/entities/e-reponse";
 import { EUserRol } from "../../../core/entities/e-user-rol";
 import { UserRepository } from "../../../infraestructure/user/user.repository";
+import { Logger } from "../../../utils/logger";
 
-export class GetUserRolUseCase implements UseCase<string, EResponse<EUserRol[]>>{
+export class GetUserRolUseCase implements UseCase<string, EUserRol[]>{
 
-    async execute(param: string): Promise<EResponse<EUserRol[]>> {
-        let response: EResponse<EUserRol[]>;
-                
+    async execute(param: string): Promise<EUserRol[]> {            
         try {        
-            const userRoles:EUserRol[] | null = await new UserRepository().getUserRol(param);
-            if(userRoles !=null){
-                response = {
-                    data: userRoles!,
-                    code: 200,
-                }
-            }else{
-                response = {                    
-                    code: 200,
-                    message:'No tiene ningun rol asignado'
-                }
-            }            
+            const userRoles: EUserRol[] = await new UserRepository().getUserRol(param);
+            return userRoles;            
         } catch (error) {
-            functions.logger.info("GetUserRolUseCase :" + error);
-            response = {
-                code: 400,
-                message: "Problemas al obtener los roles del usuario"
-            }
-        }
-        return response;
+            const e = new Logger().error("GetUserRolUseCase", error);
+            return Promise.reject(e);                     
+        }        
     }
 
 }

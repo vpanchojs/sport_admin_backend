@@ -11,6 +11,8 @@ import { initializeApp } from 'firebase-admin/app';
 //import { FirebaseError } from '@firebase/util';
 import { FirebaseError } from 'firebase-admin';
 import { EAccount } from '../../core/entities/e-account';
+import { Logger } from '../../utils/logger';
+import { CError } from '../../core/entities/enum/c-error';
 
 
 initializeApp();
@@ -68,11 +70,10 @@ export class UserRepository {
         }
     }
 
-    async getUser(accountId: string): Promise<EUser|null> {
+    async getUser(accountId: string): Promise<EUser> {
         try {
             const account = await getAuth().getUser(accountId);            
             let doc = await getFirestore().collection("user").doc(accountId).get();
-            //Obtener el email de la cuenta de usuario
             let user: EUser;            
             const data = doc.data();
             if (data) {
@@ -89,10 +90,10 @@ export class UserRepository {
                 }
                 return user;
             }
-            return null;
-        } catch (e) {
-            functions.logger.error("UserRepository - getUser:" + e);
-            return Promise.reject("Problemas al obtener el usuario");
+            return Promise.reject(CError.NotFound);
+        } catch (error) {
+            const e = new Logger().error("UserRepository - getUser:", error)
+            return Promise.reject(e);            
         }
     }
 
@@ -143,13 +144,13 @@ export class UserRepository {
     }
 
 
-    async getUserRol(accountId: string): Promise<EUserRol[] | null> {
+    async getUserRol(accountId: string): Promise<EUserRol[]> {
         try {            
-            let snapshot = await getFirestore().collection("user").doc(accountId).collection('user-rol').get();
+            let snapshot = await getFirestore().collectionGroup(CollectionsDB.userRole).where('userId', '==', accountId).get();
             let userRoles:EUserRol[] = [];
             if (snapshot.empty) {
                 console.log('No matching documents.');
-                return null;
+                return userRoles;
             }
 
             snapshot.forEach((doc: any) => {
@@ -168,29 +169,10 @@ export class UserRepository {
             return userRoles;
 
         } catch (e) {
-            functions.logger.error("UserRepository getUserRol:" + e);
-            return Promise.reject('Problemas al obtener el rol del usuario');
+            new Logger().error("UserRepository getUserRol:", e)
+            return Promise.reject(CError.Unknown);        
         }
     }
-
-    async createUserRol(userRol:EUserRol): Promise<EUserRol> {
-        try {            
-            let data = {
-                "companyId": userRol.company?.companyId,
-                "role": userRol.role?.code,                
-                "created": admin.firestore.FieldValue.serverTimestamp(),
-            };
-            
-            let doc = await getFirestore().collection("user").doc(userRol.user!.account!.accountId!).collection('user-rol').doc();
-            await doc.create(data)
-            userRol.userRolId = doc.id;
-            return userRol;
-        } catch (e) {
-            functions.logger.error("UserRepository createUserRol:" + e);
-            return Promise.reject('Problemas al crear el rol al usuario');
-        }
-    }
-
 
     async verifyEmail(uid: string): Promise<boolean> {
 
