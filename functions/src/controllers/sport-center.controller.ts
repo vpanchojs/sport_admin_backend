@@ -5,26 +5,32 @@ import { EResponse } from "../core/entities/e-reponse";
 import { ESearchSportSpace } from "../core/entities/e-search-sportspace";
 import { ESportSpace } from "../core/entities/e-sport-space";
 import { EUser } from "../core/entities/e-user";
+import { Logger } from "../utils/logger";
 
 export const createSportSpace = functions.region('southamerica-east1').https.onCall(async (data, context) => {
-  functions.logger.info("controller - createSportSpace: "+ JSON.stringify(data));
-  
-  let sportSpace: ESportSpace;
-  
-  sportSpace = {
-    name: data.name,
-    description: data.description,
-    maxPlayersTeam: data.maxPlayersTeam,
-    maxTeams: data.maxTeams,
-    material: data.material,
-    sportType: data.sportType,
-    company: <ECompany>{
-      companyId: data.company.companyId
-    }
-  }
+  new Logger().info("controller - createSportSpace: ", data)
+  try {
 
-  const response: EResponse<ESportSpace> = await new SportSpaceService().createSportSpace(sportSpace);
-  return response;
+    let sportSpace: ESportSpace;
+  
+    sportSpace = {
+      name: data.name,
+      description: data.description,
+      maxPlayersTeam: data.maxPlayersTeam,
+      maxTeams: data.maxTeams,
+      material: data.material,
+      sportType: data.sportType,
+      company: <ECompany>{
+        companyId: data.company.companyId
+      }
+    }
+
+    const response: ESportSpace = await new SportSpaceService().createSportSpace(sportSpace);
+    return response; 
+  } catch (error) {
+    new Logger().error("Controller - createSportSpace", error);
+    throw new functions.https.HttpsError('internal', 'Problemas al crear el espacio deportivo');
+  }
 
 });
 

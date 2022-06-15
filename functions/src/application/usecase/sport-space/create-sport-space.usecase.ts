@@ -1,31 +1,21 @@
 import { UseCase } from "../../../core/base/usecase";
-import { EResponse } from "../../../core/entities/e-reponse";
 import { ESportSpace } from "../../../core/entities/e-sport-space";
-import * as functions from "firebase-functions";
 import { CSportSpaceStatus } from "../../../core/entities/enum/c-sport-space-status";
 import { SportSpaceRepository } from "../../../infraestructure/user/sport-space.repository";
+import { Logger } from "../../../utils/logger";
 
-export class CreateSportSpaceUseCase implements UseCase<ESportSpace, EResponse<ESportSpace>>{
+export class CreateSportSpaceUseCase implements UseCase<ESportSpace, ESportSpace>{
 
-    async execute(param: ESportSpace): Promise<EResponse<ESportSpace>> {
-        let response: EResponse<ESportSpace>;
+    async execute(param: ESportSpace): Promise<ESportSpace> {        
         try {
 
             param.status = CSportSpaceStatus.enable         
-        
-            const sportSpaceCreated = await new SportSpaceRepository().createSportSpace(param)
-            response = {
-                data: sportSpaceCreated,
-                code: 200,
-            }
+            const sportSpaceCreated = await new SportSpaceRepository().createSportSpace(param)          
+            return sportSpaceCreated;                                  
         } catch (error) {
-            functions.logger.error("CreateSportSpaceUseCase: " + error);
-            response = {
-                code: 400,
-                message: "Problemas al crear el centro deportivo"
-            }
-        }        
-        return response;
+            const e = new Logger().error("CreateSportSpaceUseCase", error);
+            return Promise.reject(e);
+        }                
     }
 
 }
