@@ -27,21 +27,20 @@ export class UserRepository {
                 email: user.account!.email,
                 password: user.account!.password,
                 displayName: user.name + ', ' + user.lastName
-            }  
-            functions.logger.error("===========************ :" + JSON.stringify(userCreate));                    
+            }                                            
             let accountCreated = await getAuth().createUser(userCreate)
 
             return accountCreated.uid;
-        } catch (e) {
-            functions.logger.error("UserRepository - createUser :" + e );
+        } catch (e) {            
+            new Logger().error("UserRepository - createUser:", e)                        
             if(isFirebaseError(e)){      
-                functions.logger.error("UserRepository - createUser :" + e.stack);
+                new Logger().error("UserRepository - createUser:", e.stack)
                 if(e.code == 'auth/email-already-exists'){
-                    return Promise.reject("El correo electronico ya esta en uso");        
+                    return Promise.reject(CError.AlreadyExists);
                 }   
             }
-
-            return Promise.reject("Verifique sus datos e intentelo nuevamente");
+            return Promise.reject(CError.Unknown);
+            //return Promise.reject("Verifique sus datos e intentelo nuevamente");
         }
 
     }
@@ -65,8 +64,9 @@ export class UserRepository {
             user.account!.accountId = doc.id;
             return user;
         } catch (e) {
-            functions.logger.error("UserRepository - savedUser :" + e);
-            return Promise.reject('No se pudo almacenar la información del usuario, porfavor comuniquese con soporte');
+            //return Promise.reject('No se pudo almacenar la información del usuario, porfavor comuniquese con soporte');
+            new Logger().error("UserRepository - savedUser :", e)            
+            return Promise.reject(CError.Unknown);                
         }
     }
 
@@ -93,17 +93,18 @@ export class UserRepository {
             return Promise.reject(CError.NotFound);
         } catch (error) {
             const e = new Logger().error("UserRepository - getUser:", error)
-            return Promise.reject(e);            
+            return Promise.reject(e);    
+                    
         }
     }
 
-    async searchUserByDni(dni: string): Promise<EUser|null> {
+    async searchUserByDni(dni: string): Promise<EUser> {
         try {                      
             let doc = await getFirestore().collection("user").where('dni','==',dni).get();
             //Obtener el email de la cuenta de usuario
             let users: EUser[]=[];                       
-            if (doc.empty) {                
-                return null;
+            if (doc.empty) {                                
+                return Promise.reject(CError.NotFound);   
             }
             doc.forEach((user: any) => {
                 const data = user.data();
@@ -119,9 +120,9 @@ export class UserRepository {
                 });
             });            
             return users[0];
-        } catch (e) {
-            functions.logger.error("UserRepository - searchUserByDni:" + e);
-            return Promise.reject("Problemas al obtener el usuario");
+        } catch (e) {            
+            new Logger().error("UserRepository - searchUserByDni:", e)            
+            return Promise.reject(CError.Unknown);            
         }
     }
 
@@ -137,9 +138,9 @@ export class UserRepository {
             let doc = getFirestore().collection("user").doc(user.account?.accountId!);
             await doc.update(data);
             return user;
-        } catch (e) {
-            functions.logger.error("UserRepository updateUser:" + e);
-            return Promise.reject("Problemas al guardar datos");
+        } catch (e) {            
+            new Logger().error("UserRepository updateUser:", e)            
+            return Promise.reject(CError.Unknown);   
         }
     }
 
