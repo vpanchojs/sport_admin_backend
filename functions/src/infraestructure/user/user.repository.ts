@@ -13,6 +13,7 @@ import { FirebaseError } from 'firebase-admin';
 import { EAccount } from '../../core/entities/e-account';
 import { Logger } from '../../utils/logger';
 import { CError } from '../../core/entities/enum/c-error';
+import { dateTimeGmT } from '../../utils/datetime-gmt';
 
 
 initializeApp();
@@ -157,7 +158,8 @@ export class UserRepository {
             snapshot.forEach((doc: any) => {
                 const data = doc.data();
                 userRoles.push({
-                    created: data.created,
+                    userRolId: doc.id,
+                    created: dateTimeGmT(data.created.toDate().getTime()),
                     role:<ERole>{
                         code: data.role
                     },

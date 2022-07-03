@@ -23,7 +23,8 @@ export class CompanyRepository {
             snapshot.forEach((doc: any) => {
                 const data = doc.data();
                 userRoles.push({
-                    created: data.created,
+                    userRolId: doc.id,
+                    created: dateTimeGmT(data.created.toDate().getTime()),
                     role: <ERole>{
                         code: data.role
                     },

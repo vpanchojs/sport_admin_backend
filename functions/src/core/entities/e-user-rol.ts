@@ -7,7 +7,7 @@ import { ECompany } from './e-company';
 
 export interface EUserRol{
   userRolId?:String;
-  created?:Date;
+  created?:number;
   removed?:Date;
   user?:EUser;
   role?:ERole;
