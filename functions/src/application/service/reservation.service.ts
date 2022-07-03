@@ -12,36 +12,24 @@ import * as functions from "firebase-functions";
 import { DeleteReservationUseCase } from "../usecase/reservation/delete-reservation.usecase";
 import { CUserStatus } from "../../core/entities/enum/c-user-state";
 import { CreateUserUseCase } from "../usecase/user/create-user.usecase";
+import { Logger } from "../../utils/logger";
 
 export class ReservationService {
 
-    async createReservation(reservation: EReservation): Promise<EResponse<EReservation>> {
-        let response: EResponse<EReservation>;                
-        if(!reservation.client?.account?.accountId){
-            reservation.client!.status = CUserStatus.REGISTRO_PENDIENTE;  
-            const clientCreated = await new CreateUserUseCase().execute(reservation.client!);
-            if (clientCreated.data == null) { 
-                response = {
-                    code: 400,
-                    message: clientCreated.message
-                } 
-                return response;
-            }
-            reservation.client!.userId= clientCreated.data.account?.accountId;
-        } 
-        // Crear la compañia,                       
-        const companyCreated = await new CreateReservationUseCase().execute(reservation);
-
-        if (companyCreated.data == null) {          
-            response = {
-                code: 400,
-                message: companyCreated.message
-            }
-        } else {
-            return companyCreated;
-        }
-
-        return response;
+    async createReservation(reservations: Array<EReservation>): Promise<boolean> {     
+        try {
+            if(reservations[0].client?.account?.accountId == null){                
+                reservations[0].client!.status = CUserStatus.REGISTRO_PENDIENTE;  
+                const clientCreated = await new CreateUserUseCase().execute(reservations[0].client!); 
+                reservations[0].client!.userId = clientCreated.account?.accountId;
+            } 
+            // Crear la compañia,                       
+            await new CreateReservationUseCase().execute(reservations);
+            return true;
+        } catch (error) {
+            const e = new Logger().error("ReservationService - createReservation", error);
+            return Promise.reject(e);
+        }                    
     }
 
     async cancelReservation(reservation: EReservation): Promise<EResponse<EReservation>> {

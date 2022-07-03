@@ -8,12 +8,31 @@ import { ESchedule } from "../core/entities/e-schedule";
 import { EPrice } from "../core/entities/e-price";
 import { ESportSpace } from "../core/entities/e-sport-space";
 import { EUser } from "../core/entities/e-user";
+import { Logger } from "../utils/logger";
+import { CError } from "../core/entities/enum/c-error";
 
 export class ReservationRepository {
-    async createReservation(reservation: EReservation): Promise<EReservation> {
-        try {
-            let data = {
-                'status': reservation.status,
+    async createReservation(reservations: Array<EReservation>): Promise<boolean> {
+        try {        
+            const batch = admin.firestore().batch();
+            for (let reservation of reservations){
+                let expiredProducts = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule?.sportSpace!.company?.companyId)
+                .collection(CollectionsDB.sportspace).doc(reservation.schedule?.sportSpace?.sportSpaceId)
+                .collection(CollectionsDB.reservation).doc();  
+              batch.set(expiredProducts, this.EReservateToParam(reservation));           
+              reservation = expiredProducts.id;
+            }            
+            await batch.commit();
+            return true;
+        } catch (e) {
+            new Logger().error("ReservationRepository - createReservation :", e)
+            return Promise.reject(CError.Unknown);
+        }
+    }
+
+    EReservateToParam(reservation: EReservation): any{
+        let data = {
+                'status':reservation.status,
                 "scheduleId": reservation.schedule?.scheduleId,
                 "initTime": new Date(reservation.initTime! + ((5 * 60)* 60000)),
                 "endTime": new Date(reservation.endTime! + ((5 * 60)* 60000)),
@@ -29,16 +48,7 @@ export class ReservationRepository {
                 },
                 "ownerDate": reservation.ownerDate
             };
-            let doc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule?.sportSpace!.company?.companyId)
-                                    .collection(CollectionsDB.sportspace).doc(reservation.schedule?.sportSpace?.sportSpaceId)
-                                    .collection(CollectionsDB.reservation).doc();
-            await doc.create(data)
-            reservation.reservationId = doc.id;
-            return reservation;
-        } catch (e) {
-            functions.logger.error("Error al ReservationRepository - createReservation :" + e);
-            return Promise.reject(e);
-        }
+        return data;
     }
 
     async cancelReservation(reservation: EReservation): Promise<EReservation> {
