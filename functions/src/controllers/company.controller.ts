@@ -49,4 +49,42 @@ export const getCompanyById = functions.region('southamerica-east1').https.onCal
   }
 });
 
+export const createUserRole = functions.region('southamerica-east1').https.onCall(async (data, context) => {
+  new Logger().info("controller - createUserRole:", data)
+  try {
+    const response: EUserRol = await new CompanyService().createUserRole(data);
+    return response;
+  } catch (error) {
+    new Logger().error("Controller - createUserRole", error);
+    if (error == CError.NotFound) {
+      throw new functions.https.HttpsError('not-found', 'No existe el usuario');
+    }else if (error == CError.AlreadyExists) {
+      throw new functions.https.HttpsError('already-exists', 'El usuario ya tiene rol asignado');
+    } else {
+      throw new functions.https.HttpsError('internal', 'Problemas crear el rol');
+    }
+  }
+});
+
+export const removeUserRole = functions.region('southamerica-east1').https.onCall(async (data, context) => {
+  new Logger().info("controller - removeUserRole:", data)
+  try {
+    const response: boolean = await new CompanyService().removeUserRole(data);
+    return response;
+  } catch (error) {
+    new Logger().error("Controller - removeUserRole", error);
+    if (error == CError.NotFound) {
+      throw new functions.https.HttpsError('not-found', 'No existe la compañia');
+    } else {
+      throw new functions.https.HttpsError('internal', 'No se pudo remover el rol');
+    }
+  }
+});
+
+
+
+
+
+
+
 

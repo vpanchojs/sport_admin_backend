@@ -4,16 +4,15 @@ import { CRoleStatus } from "../../../core/entities/enum/c-role-status";
 import { CompanyRepository } from "../../../infraestructure/user/company.repository";
 import { Logger } from "../../../utils/logger";
 
+export class RemoveRoleCompanyUseCase implements UseCase<EUserRol, boolean>{
 
-export class CreateRoleCompanyUseCase implements UseCase<EUserRol, EUserRol>{
-
-    async execute(param: EUserRol): Promise<EUserRol> {
+    async execute(param: EUserRol): Promise<boolean> {
         try {
-            param.status = CRoleStatus.enable;
-            const roleCreated = await new CompanyRepository().createCompanyRol(param)
-            return roleCreated;
+            param.status = CRoleStatus.disable;            
+            const removed = await new CompanyRepository().removeCompanyRole(param)
+            return removed;
         } catch (error) {            
-            const e = new Logger().error("CreateRoleUserUseCase", error);
+            const e = new Logger().error("RemoveRoleCompanyUseCase", error);
             return Promise.reject(e);
         }
     

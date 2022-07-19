@@ -1,2 +1,2 @@
-export enum CRoleStatus { enable='A', disable='D' }
+export enum CRoleStatus { enable = 'E', disable = 'D' }
 

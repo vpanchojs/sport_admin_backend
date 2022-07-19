@@ -3,7 +3,6 @@ import { EUser } from "../../core/entities/e-user";
 import * as functions from "firebase-functions";
 import { EUserRol } from '../../core/entities/e-user-rol';
 import { ECompany } from '../../core/entities/e-company';
-import { ERole } from '../../core/entities/e-role';
 import { CollectionsDB } from '../db/collections';
 import { getAuth,  } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
@@ -14,6 +13,8 @@ import { EAccount } from '../../core/entities/e-account';
 import { Logger } from '../../utils/logger';
 import { CError } from '../../core/entities/enum/c-error';
 import { dateTimeGmT } from '../../utils/datetime-gmt';
+import { UserRecord } from 'firebase-functions/v1/auth';
+import { CRoleStatus } from '../../core/entities/enum/c-role-status';
 
 
 initializeApp();
@@ -32,14 +33,14 @@ export class UserRepository {
             let accountCreated = await getAuth().createUser(userCreate)
 
             return accountCreated.uid;
-        } catch (e) {            
-            new Logger().error("UserRepository - createUser:", e)                        
+        } catch (e) {                              
             if(isFirebaseError(e)){      
                 new Logger().error("UserRepository - createUser:", e.stack)
                 if(e.code == 'auth/email-already-exists'){
                     return Promise.reject(CError.AlreadyExists);
                 }   
             }
+            new Logger().error("UserRepository - createUser:", e);
             return Promise.reject(CError.Unknown);
             //return Promise.reject("Verifique sus datos e intentelo nuevamente");
         }
@@ -127,6 +128,27 @@ export class UserRepository {
         }
     }
 
+    async getAccountByEmail(email: string): Promise<EAccount> {
+        try {         
+            const account: UserRecord = await getAuth().getUserByEmail(email);
+
+            return <EAccount>{
+                accountId: account.uid,
+                email: account.email,
+                verifyEmail: account.emailVerified,                
+            };
+        } catch (e) {
+            if(isFirebaseError(e)){      
+                new Logger().error("UserRepository - getAccountByEmail:", e)
+                if(e.code == 'auth/user-not-found'){
+                    return Promise.reject(CError.NotFound);
+                }   
+            }               
+            new Logger().error("UserRepository - getAccountByEmail:", e)                   
+            return Promise.reject(CError.Unknown);            
+        }
+    }
+
     async updateUser(user: EUser): Promise<EUser> {
         try {
             let data = {
@@ -148,7 +170,7 @@ export class UserRepository {
 
     async getUserRol(accountId: string): Promise<EUserRol[]> {
         try {            
-            let snapshot = await getFirestore().collectionGroup(CollectionsDB.userRole).where('userId', '==', accountId).get();
+            let snapshot = await getFirestore().collectionGroup(CollectionsDB.userRole).where('userId', '==', accountId).where('status', '==', CRoleStatus.enable).get();
             let userRoles:EUserRol[] = [];
             if (snapshot.empty) {
                 console.log('No matching documents.');
@@ -160,9 +182,7 @@ export class UserRepository {
                 userRoles.push({
                     userRolId: doc.id,
                     created: dateTimeGmT(data.created.toDate().getTime()),
-                    role:<ERole>{
-                        code: data.role
-                    },
+                    role: data.role,
                     company:<ECompany>{ 
                         companyId:data.companyId
                     }
