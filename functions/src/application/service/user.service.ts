@@ -52,5 +52,15 @@ export class UserService {
             return Promise.reject(e);            
         }
     }
+
+    async searchUserByEmail(userId: string): Promise<EUser> {
+        try {
+            let responseGetUser = await new SearchUserByDniUseCase().execute(userId);
+            return responseGetUser        
+        } catch (error) {
+            const e = new Logger().error("UserService - searchUserByDni", error);
+            return Promise.reject(e);            
+        }
+    }
     
 }
