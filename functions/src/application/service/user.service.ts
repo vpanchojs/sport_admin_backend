@@ -3,6 +3,7 @@ import { CUserStatus } from "../../core/entities/enum/c-user-state";
 import { Logger } from "../../utils/logger";
 import { GetCompanyByIdUseCase } from "../usecase/company/get-company.usecase";
 import { CreateUserUseCase } from "../usecase/user/create-user.usecase";
+import { DeleteAccountUseCase } from "../usecase/user/delete-account-usecase";
 import { GetUserRolUseCase } from "../usecase/user/get-user-rol.usecase";
 import { GetUserByIdUseCase } from "../usecase/user/get-user.usecase";
 import { SearchUserByDniUseCase } from "../usecase/user/search-user-dni-usecase";
@@ -62,5 +63,15 @@ export class UserService {
             return Promise.reject(e);            
         }
     }
+
+    async deleteAccount(user: EUser): Promise<boolean> {
+        try {
+            let responseGetUser = await new DeleteAccountUseCase().execute(user);
+            return responseGetUser        
+        } catch (error) {
+            const e = new Logger().error("UserService - deleteAccount", error);
+            return Promise.reject(e);            
+        }
+    }    
     
 }

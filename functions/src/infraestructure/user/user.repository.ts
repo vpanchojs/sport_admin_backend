@@ -167,7 +167,19 @@ export class UserRepository {
         }
     }
 
-
+    async updateStatus(user: EUser): Promise<boolean> {
+        try {
+            let data = {
+                "status": user.status
+            };
+            let doc = getFirestore().collection("user").doc(user.userId!);
+            await doc.update(data);
+            return true;
+        } catch (e) {            
+            new Logger().error("UserRepository updateStatus:", e)            
+            return Promise.reject(CError.Unknown);   
+        }
+    }
     async getUserRol(accountId: string): Promise<EUserRol[]> {
         try {            
             let snapshot = await getFirestore().collectionGroup(CollectionsDB.userRole).where('userId', '==', accountId).where('status', '==', CRoleStatus.enable).get();
@@ -212,9 +224,22 @@ export class UserRepository {
 
     }
 
+    async deleteAccount(dni: string): Promise<boolean> {
+        try {                      
+            await admin.auth().updateUser(dni,{
+                disabled: true,
+            });
+            return true;
+        } catch (e) {            
+            new Logger().error("UserRepository - deleteAccount:", e)            
+            return Promise.reject(CError.Unknown);            
+        }
+    }
 
 }
 
 export default function isFirebaseError(error: unknown): error is FirebaseError {
     return (error as FirebaseError).code !== undefined;
   }
+
+  
