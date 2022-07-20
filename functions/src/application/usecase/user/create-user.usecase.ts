@@ -21,20 +21,25 @@ export class CreateUserUseCase implements UseCase<EUser, EUser>{
                     user = await new UserRepository().searchUserByDni(param.dni!);                         
                 } catch (error){
                     new Logger().info("=====No existe user2", param.dni);                                            
-                }                                
+                }                             
                 //Si el usuario tiene usuario y cuenta
                 if(user != null && user.status == CUserStatus.ACTIVO){   
                     return Promise.reject(CError.AlreadyExists);                  
-                }  
+                }else{                    
+                    if(user?.status == CUserStatus.ELIMINADO || user?.status == CUserStatus.INACTIVO){                        
+                        return Promise.reject(CError.FailedPrecondition);
+                    }
+                }               
                 param.account!.accountId=user?.account?.accountId;           
-                const accountId: string = await new UserRepository().createUser(param);                
+                const accountId: string = await new UserRepository().createUser(param);                                
                 if(user?.status == CUserStatus.REGISTRO_PENDIENTE){          
                     const updateUser: EUser = await new UserRepository().updateUser(param);
                     if (updateUser) {
                         return updateUser;
                     } 
                     return Promise.reject(CError.Unknown);                    
-                }               
+                }
+
                 param.account!.accountId = accountId;
 
             }            
