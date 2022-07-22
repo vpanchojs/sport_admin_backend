@@ -75,7 +75,7 @@ export class CompanyRepository {
                     name: data.name,                                        
                     status: data.status,
                     created: dateTimeGmT(data.created.toDate().getTime()),
-                    updated: data.updated ? (dateTimeGmT(data.created.toDate().getTime())) : null,
+                    updated: data.updated != null ? (dateTimeGmT(data.updated.toDate().getTime())) : null,
                     numSportSpaces: data.numSportSpaces,                    
                 }
                 return company;
