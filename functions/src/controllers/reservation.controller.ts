@@ -20,7 +20,11 @@ export const createReservation = functions.region('southamerica-east1').https.on
       if (error == CError.ReservationExpired) {
         throw new functions.https.HttpsError('invalid-argument', 'Existen reserva/s que expiraron'); 
       } else {
-        throw new functions.https.HttpsError('internal', 'Problemas al crear reservación'); 
+        if(error == CError.FailedPrecondition){
+          throw new functions.https.HttpsError('failed-precondition', 'El usuario esta inactivo o en proceso de eliminación');
+        }else{
+          throw new functions.https.HttpsError('internal', 'Problemas al crear reserva');
+        }                  
       }      
     }    
   }

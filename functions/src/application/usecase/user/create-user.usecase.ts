@@ -14,22 +14,21 @@ export class CreateUserUseCase implements UseCase<EUser, EUser>{
                 return Promise.reject(CError.BadRequest);
             }
             param.account?.email?.trim(); 
+            var user: EUser = {};
+            try {
+                user = await new UserRepository().searchUserByDni(param.dni!);                         
+            } catch (error){               
+                new Logger().info("=====No existe user2", param.dni);                                            
+            }                                                            
+            if(user.status == CUserStatus.ELIMINADO || user.status == CUserStatus.INACTIVO){
+                return Promise.reject(CError.FailedPrecondition);
+            }            
             //CUserStatus.ACTIVO si es creado desde el regitro de cuenta normal            
-            if(param.status == CUserStatus.ACTIVO){
-                var user: EUser = {};
-                try {
-                    user = await new UserRepository().searchUserByDni(param.dni!);                         
-                } catch (error){
-                    new Logger().info("=====No existe user2", param.dni);                                            
-                }                             
+            if(param.status == CUserStatus.ACTIVO){                                                           
                 //Si el usuario tiene usuario y cuenta
                 if(user != null && user.status == CUserStatus.ACTIVO){   
                     return Promise.reject(CError.AlreadyExists);                  
-                }else{                    
-                    if(user?.status == CUserStatus.ELIMINADO || user?.status == CUserStatus.INACTIVO){                        
-                        return Promise.reject(CError.FailedPrecondition);
-                    }
-                }               
+                }            
                 param.account!.accountId=user?.account?.accountId;           
                 const accountId: string = await new UserRepository().createUser(param);                                
                 if(user?.status == CUserStatus.REGISTRO_PENDIENTE){          

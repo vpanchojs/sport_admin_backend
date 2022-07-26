@@ -6,4 +6,5 @@ export interface EAccount {
   password?: string
   sessions?: Array<EDevice>
   verified?: boolean
+  disabled?: boolean
 }

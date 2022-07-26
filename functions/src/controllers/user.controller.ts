@@ -36,7 +36,7 @@ export const createUser = functions.region('southamerica-east1').https.onCall(as
           if(error == CError.FailedPrecondition){
             throw new functions.https.HttpsError('failed-precondition', 'El usuario esta inactivo o en proceso de eliminación');
           }else{
-            throw new functions.https.HttpsError('internal', 'Problemas al crear cliente');     
+            throw new functions.https.HttpsError('internal', 'Problemas al crear cliente');
           }          
         }         
       }            
@@ -77,8 +77,12 @@ export const searchUser = functions.region('southamerica-east1').https.onCall(as
     if (error == CError.NotFound) {
       throw new functions.https.HttpsError('not-found', 'No existe usuario');
     } else {
-      throw new functions.https.HttpsError('internal', 'Problemas al obtener usuario');
-    }    
+      if(error == CError.FailedPrecondition){
+        throw new functions.https.HttpsError('failed-precondition', 'El usuario esta en proceso de eliminación y no se puede hacer uso de la información');
+      }else{
+        throw new functions.https.HttpsError('internal', 'Problemas al crear cliente');
+      }       
+    }
   }
 });
 

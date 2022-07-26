@@ -120,7 +120,7 @@ export class UserRepository {
                     },
                     status:data.status
                 });
-            });            
+            });           
             return users[0];
         } catch (e) {            
             new Logger().error("UserRepository - searchUserByDni:", e)            
@@ -130,12 +130,12 @@ export class UserRepository {
 
     async getAccountByEmail(email: string): Promise<EAccount> {
         try {         
-            const account: UserRecord = await getAuth().getUserByEmail(email);
-
+            const account: UserRecord = await getAuth().getUserByEmail(email);            
             return <EAccount>{
                 accountId: account.uid,
                 email: account.email,
-                verifyEmail: account.emailVerified,                
+                verifyEmail: account.emailVerified,
+                disabled: account.disabled             
             };
         } catch (e) {
             if(isFirebaseError(e)){      

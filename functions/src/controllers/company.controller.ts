@@ -61,7 +61,11 @@ export const createUserRole = functions.region('southamerica-east1').https.onCal
     }else if (error == CError.AlreadyExists) {
       throw new functions.https.HttpsError('already-exists', 'El usuario ya tiene rol asignado');
     } else {
-      throw new functions.https.HttpsError('internal', 'Problemas crear el rol');
+      if(error == CError.FailedPrecondition){
+        throw new functions.https.HttpsError('failed-precondition', 'El usuario esta inactivo o en proceso de eliminación');
+      }else{
+        throw new functions.https.HttpsError('internal', 'Problemas crear el rol');
+      }                
     }
   }
 });
