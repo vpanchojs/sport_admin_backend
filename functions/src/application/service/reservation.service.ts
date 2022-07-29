@@ -18,11 +18,18 @@ export class ReservationService {
 
     async createReservation(reservations: Array<EReservation>): Promise<boolean> {     
         try {
+            let clientCreated;
             if(reservations[0].client?.account?.accountId == null){                
                 reservations[0].client!.status = CUserStatus.REGISTRO_PENDIENTE;  
-                const clientCreated = await new CreateUserUseCase().execute(reservations[0].client!); 
+                clientCreated = await new CreateUserUseCase().execute(reservations[0].client!); 
                 reservations[0].client!.userId = clientCreated.account?.accountId;
             } 
+            if(clientCreated?.dni){
+                reservations[0].client!.dni = clientCreated.dni;
+                reservations[0].client!.lastName = clientCreated.lastName;
+                reservations[0].client!.name = clientCreated.name;
+                reservations[0].client!.userId = clientCreated.account?.accountId;
+            }
             // Crear la compañia,                       
             await new CreateReservationUseCase().execute(reservations);
             return true;

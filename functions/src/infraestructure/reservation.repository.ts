@@ -14,6 +14,7 @@ import { CError } from "../core/entities/enum/c-error";
 export class ReservationRepository {
     async createReservation(reservations: Array<EReservation>): Promise<boolean> {
         try {        
+            new Logger().info("==================2222===========:", reservations);       
             const batch = admin.firestore().batch();
             for (let reservation of reservations){
                 let expiredProducts = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule?.sportSpace!.company?.companyId)
@@ -21,7 +22,8 @@ export class ReservationRepository {
                 .collection(CollectionsDB.reservation).doc();  
               batch.set(expiredProducts, this.EReservateToParam(reservation));           
               reservation = expiredProducts.id;
-            }            
+            }     
+            new Logger().info("==================1===========:", reservations);       
             await batch.commit();
             return true;
         } catch (e) {

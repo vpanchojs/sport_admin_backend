@@ -28,13 +28,14 @@ export class CreateReservationUseCase implements UseCase<Array<EReservation>, bo
                         dateTemp.setMinutes(0);
                         dateTemp.setSeconds(0);
                         dateTemp.setMilliseconds(0);
-                        reservation.ownerDate = dateTemp.getTime();
+                        reservation.ownerDate = dateTemp.getTime();                        
+                        reservation.client = param[0].client;
                     }                
                 }
             }
             functions.logger.info("CreateReservationUseCase: ownerDate " + param.toString()); 
             // En caso de que no exista reservas expiradas
-            if (spiralReserves == 0) {
+            if (spiralReserves == 0) {                
                 await new ReservationRepository().createReservation(param)
                 return true;             
             }

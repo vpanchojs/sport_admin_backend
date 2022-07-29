@@ -41,8 +41,14 @@ export class CreateUserUseCase implements UseCase<EUser, EUser>{
 
                 param.account!.accountId = accountId;
 
-            }            
-            const userCreated = await new UserRepository().savedUser(param)
+            }      
+            // En caso de que se envie del crear reserva un usuario que esta creado pero no realizo busqueda      
+            let userCreated;
+            if(user.dni){
+                userCreated = user;
+            }else{
+                userCreated = await new UserRepository().savedUser(param)
+            }
             return userCreated;
         } catch (error) {
             const e = new Logger().error("CreateRoleUserUseCase", error);
