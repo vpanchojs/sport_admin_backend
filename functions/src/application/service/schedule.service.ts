@@ -3,7 +3,6 @@ import { ESchedule } from "../../core/entities/e-schedule";
 import { RemoveScheduleUseCase } from "../usecase/schedule/remove-schedule.usecase";
 import { CreateScheduleUseCase } from "../usecase/sport-space/create-schedule.usecase";
 import { GetAllScheduleBySportSpaceUseCase } from "../usecase/sport-space/get-all-schedule-by-sport-space.usecase";
-import * as functions from "firebase-functions";
 import { ESportSpace } from "../../core/entities/e-sport-space";
 
 export class ScheduleService {
@@ -27,25 +26,15 @@ export class ScheduleService {
             for (let day of schedule.days!){
                 for(let scheduleOld of schedulesResponse.data!){
                     for(let dayOld of scheduleOld.days!){
-                        if(dayOld == day){
-
-                            if(schedule.initHour! > scheduleOld.initHour! && schedule.initHour! < scheduleOld.endHour!){
-                                functions.logger.error("ScheduleService - createSchedule: initHour " +  schedule.initHour);
-                                functions.logger.error("ScheduleService - createSchedule: oldInitHour " +  scheduleOld.initHour);                                
-                                functions.logger.error("ScheduleService - createSchedule: oldEndHour " +  scheduleOld.endHour!);
+                        if(dayOld == day){                            
+                            if( (
+                                    (schedule.initHour! >= scheduleOld.endHour! && schedule.endHour! > scheduleOld.endHour!) 
+                                ||
+                                    (schedule.initHour! < scheduleOld.endHour! && schedule.endHour! <= scheduleOld.initHour!) 
+                                ) == false  
+                            ){
                                 collisionSchedules = true;
-                                break;
                             }                            
-
-
-                            if(schedule.endHour! > scheduleOld.initHour! && schedule.endHour! < scheduleOld.endHour!){
-                                functions.logger.error("ScheduleService - createSchedule: endHour " +  schedule.endHour);
-                                functions.logger.error("ScheduleService - createSchedule: oldInitHour " +  scheduleOld.initHour!);
-                                functions.logger.error("ScheduleService - createSchedule: oldEndHour " +  scheduleOld.endHour!);
-                                collisionSchedules = true;
-                                break;
-                            }
-
                         }
                     }
                 }
