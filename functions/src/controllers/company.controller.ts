@@ -64,7 +64,11 @@ export const createUserRole = functions.region('southamerica-east1').https.onCal
       if(error == CError.FailedPrecondition){
         throw new functions.https.HttpsError('failed-precondition', 'El usuario esta inactivo o en proceso de eliminación');
       }else{
-        throw new functions.https.HttpsError('internal', 'Problemas crear el rol');
+        if(error == CError.PermissionDenied){
+          throw new functions.https.HttpsError('permission-denied', 'El usuario no esta verificado');
+        }else{      
+          throw new functions.https.HttpsError('internal', 'Problemas crear el rol');
+        }
       }                
     }
   }

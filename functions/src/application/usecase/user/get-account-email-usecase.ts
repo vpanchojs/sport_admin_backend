@@ -12,6 +12,9 @@ export class GetAccountByEmailUseCase implements UseCase<string, EAccount>{
             if (account.disabled){
                 return Promise.reject(CError.FailedPrecondition);
             }
+            if(!account.verified){
+                return Promise.reject(CError.PermissionDenied);
+            }
             return account                
         } catch (error) {            
             const e = new Logger().error("GetAccountByEmailUseCase:", error);

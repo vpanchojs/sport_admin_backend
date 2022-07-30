@@ -134,7 +134,7 @@ export class UserRepository {
             return <EAccount>{
                 accountId: account.uid,
                 email: account.email,
-                verifyEmail: account.emailVerified,
+                verified: account.emailVerified,
                 disabled: account.disabled             
             };
         } catch (e) {
