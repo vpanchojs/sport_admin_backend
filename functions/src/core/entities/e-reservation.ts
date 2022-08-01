@@ -11,7 +11,7 @@ import { CReservationStatus } from './enum/c-reservation-status';
 import { EPayment } from './e-payment';
 
 export interface EReservation {
-  reservationId?: String;
+  reservationId?: string;
   schedule?: ESchedule;
   ownerDate?: number;
   initTime?: number;

@@ -22,6 +22,8 @@ export const createReservation = functions.region('southamerica-east1').https.on
       } else {
         if(error == CError.FailedPrecondition){
           throw new functions.https.HttpsError('failed-precondition', 'El usuario esta inactivo o en proceso de eliminación');
+        }else if(error == CError.AlreadyExists){
+          throw new functions.https.HttpsError('already-exists', 'La reserva no esta disponible');
         }else{
           throw new functions.https.HttpsError('internal', 'Problemas al crear reserva');
         }                  

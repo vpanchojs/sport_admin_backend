@@ -4,7 +4,7 @@ import { EUserRol } from './e-user-rol';
 import { CCompanyStatus } from './enum/c-company-status';
 
 export interface ECompany {
-  companyId?: String;
+  companyId?: string;
   name?: String;
   description?: String;
   verified?: boolean;

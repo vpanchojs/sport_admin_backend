@@ -1,6 +1,6 @@
 import { EReservation } from "../core/entities/e-reservation";
 import admin = require('firebase-admin');
-const { getFirestore } = require('firebase-admin/firestore');
+import { getFirestore } from 'firebase-admin/firestore';
 import * as functions from "firebase-functions";
 import { CollectionsDB } from "./db/collections";
 import { ESearchReservation } from "../core/entities/e-search-reservations";
@@ -10,25 +10,34 @@ import { ESportSpace } from "../core/entities/e-sport-space";
 import { EUser } from "../core/entities/e-user";
 import { Logger } from "../utils/logger";
 import { CError } from "../core/entities/enum/c-error";
+import { dateTimeFixedGmt } from "../utils/datetime-gmt";
 
 export class ReservationRepository {
     async createReservation(reservations: Array<EReservation>): Promise<boolean> {
-        try {        
-            new Logger().info("==================2222===========:", reservations);       
-            const batch = admin.firestore().batch();
-            for (let reservation of reservations){
-                let expiredProducts = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule?.sportSpace!.company?.companyId)
-                .collection(CollectionsDB.sportspace).doc(reservation.schedule?.sportSpace?.sportSpaceId)
-                .collection(CollectionsDB.reservation).doc();  
-              batch.set(expiredProducts, this.EReservateToParam(reservation));           
-              reservation = expiredProducts.id;
-            }     
-            new Logger().info("==================1===========:", reservations);       
-            await batch.commit();
+        try {       
+            await admin.firestore().runTransaction(async (t) => {                
+                for (let reservation of reservations){
+                    const uid : string = (dateTimeFixedGmt(reservation.initTime!)+ dateTimeFixedGmt(reservation.endTime!)).toString(); 
+                    let reservationDoc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule!.sportSpace!.company!.companyId!)
+                    .collection(CollectionsDB.sportspace).doc(reservation.schedule!.sportSpace!.sportSpaceId!)
+                    .collection(CollectionsDB.reservation).doc(uid);                                    
+                    const doc = await t.get(reservationDoc);                  
+                    if(doc.exists){                     
+                        throw CError.AlreadyExists;
+                    }
+                }
+                for (let reservation of reservations){
+                    const uid : string = (dateTimeFixedGmt(reservation.initTime!)+ dateTimeFixedGmt(reservation.endTime!)).toString(); 
+                    let reservationDoc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule!.sportSpace!.company!.companyId!)
+                    .collection(CollectionsDB.sportspace).doc(reservation.schedule!.sportSpace!.sportSpaceId!)
+                    .collection(CollectionsDB.reservation).doc(uid);                                                                                
+                    t.set(reservationDoc, this.EReservateToParam(reservation))                                                                   
+                }
+            });
             return true;
-        } catch (e) {
-            new Logger().error("ReservationRepository - createReservation :", e)
-            return Promise.reject(CError.Unknown);
+        } catch (e) {            
+            const error = new Logger().error("ReservationRepository - createReservation :", e)
+            return Promise.reject(error);
         }
     }
 
@@ -37,7 +46,7 @@ export class ReservationRepository {
                 'status':reservation.status,
                 "scheduleId": reservation.schedule?.scheduleId,
                 "initTime": new Date(reservation.initTime! + ((5 * 60)* 60000)),
-                "endTime": new Date(reservation.endTime! + ((5 * 60)* 60000)),
+                "endTime": new Date(reservation.endTime ! + ((5 * 60)* 60000)),
                 'observation': reservation.observation,
                 'created': admin.firestore.FieldValue.serverTimestamp(),
                 "priceId": reservation.price.priceId,
@@ -60,9 +69,9 @@ export class ReservationRepository {
                 'observation':reservation.observation,
                 'updated': admin.firestore.FieldValue.serverTimestamp()
             };
-            let doc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule?.sportSpace!.company?.companyId)
-                                    .collection(CollectionsDB.sportspace).doc(reservation.schedule?.sportSpace?.sportSpaceId)
-                                    .collection(CollectionsDB.reservation).doc(reservation.reservationId);
+            let doc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule!.sportSpace!.company!.companyId!)
+                                    .collection(CollectionsDB.sportspace).doc(reservation.schedule!.sportSpace!.sportSpaceId!)
+                                    .collection(CollectionsDB.reservation).doc(reservation.reservationId!);
             await doc.update(data)
             reservation.updated = new Date().getTime();
             reservation.reservationId = doc.id;
@@ -76,8 +85,8 @@ export class ReservationRepository {
     async getReservationsByDate(search: ESearchReservation): Promise<ESearchReservation> {
         try {
             functions.logger.info("ReservationRepository - getReservationsByDate :" + search.date!.toString());
-            let snapshot =  await getFirestore().collection(CollectionsDB.company).doc(search.sportSpace!.company?.companyId)
-            .collection(CollectionsDB.sportspace).doc(search.sportSpace?.sportSpaceId)
+            let snapshot =  await getFirestore().collection(CollectionsDB.company).doc(search.sportSpace!.company!.companyId!)
+            .collection(CollectionsDB.sportspace).doc(search.sportSpace!.sportSpaceId!)
             .collection(CollectionsDB.reservation).where("ownerDate", "==", search.date!).get()
 
             let reservations: EReservation[] = [];
@@ -131,9 +140,9 @@ export class ReservationRepository {
                 'observation':reservation.observation,
                 'updated': admin.firestore.FieldValue.serverTimestamp()
             };
-            let doc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule?.sportSpace!.company?.companyId)
-                                    .collection(CollectionsDB.sportspace).doc(reservation.schedule?.sportSpace?.sportSpaceId)
-                                    .collection(CollectionsDB.reservation).doc(reservation.reservationId);
+            let doc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule!.sportSpace!.company!.companyId!)
+                                    .collection(CollectionsDB.sportspace).doc(reservation.schedule!.sportSpace!.sportSpaceId!)
+                                    .collection(CollectionsDB.reservation).doc(reservation.reservationId!);
             await doc.update(data)
             reservation.reservationId = doc.id;
             reservation.updated = new Date().getTime();
@@ -151,9 +160,9 @@ export class ReservationRepository {
                 'observation':reservation.observation,
                 'updated': admin.firestore.FieldValue.serverTimestamp()
             };
-            let doc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule?.sportSpace!.company?.companyId)
-                                    .collection(CollectionsDB.sportspace).doc(reservation.schedule?.sportSpace?.sportSpaceId)
-                                    .collection(CollectionsDB.reservation).doc(reservation.reservationId);
+            let doc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule!.sportSpace!.company!.companyId!)
+                                    .collection(CollectionsDB.sportspace).doc(reservation.schedule!.sportSpace!.sportSpaceId!)
+                                    .collection(CollectionsDB.reservation).doc(reservation.reservationId!);
             await doc.update(data)
             reservation.reservationId = doc.id;
             reservation.updated = new Date().getTime();
@@ -165,9 +174,9 @@ export class ReservationRepository {
     }
     async deleteReservation(reservation: EReservation): Promise<EReservation> {
         try {          
-            let doc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule?.sportSpace!.company?.companyId)
-                                    .collection(CollectionsDB.sportspace).doc(reservation.schedule?.sportSpace?.sportSpaceId)
-                                    .collection(CollectionsDB.reservation).doc(reservation.reservationId);
+            let doc = getFirestore().collection(CollectionsDB.company).doc(reservation.schedule!.sportSpace!.company!.companyId!)
+                                    .collection(CollectionsDB.sportspace).doc(reservation.schedule!.sportSpace!.sportSpaceId!)
+                                    .collection(CollectionsDB.reservation).doc(reservation.reservationId!);
             await doc.delete()
             return reservation;
         } catch (e) {

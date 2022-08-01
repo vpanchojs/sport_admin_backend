@@ -7,7 +7,7 @@ import { CSportSpaceStatus } from "./enum/c-sport-space-status";
 import { CSportSpaceType } from "./enum/c-sport-space-type";
 
 export interface ESportSpace {
-    sportSpaceId?:String;
+    sportSpaceId?:string;
     name?:String;
     description?:String;
     maxTeams?:number;
